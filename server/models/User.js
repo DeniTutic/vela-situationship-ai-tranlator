@@ -19,4 +19,4 @@ const userSchema = new mongoose.Schema({
   historySummaryUpdatedAt: { type: Date, default: null },
 }, { timestamps: true });
 
-module.exports = mongoose.model('User', userSchema);p
+module.exports = mongoose.model('User', userSchema);
