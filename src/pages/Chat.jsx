@@ -4,6 +4,7 @@ import Sidebar from '../components/Sidebar'
 import ChatBubble from '../components/ChatBubble'
 import InputBar from '../components/InputBar'
 import useChat from '../hooks/useChat'
+import api from '../utils/api'
 
 const WELCOME_MESSAGE = {
   role: 'assistant',
@@ -38,6 +39,16 @@ const Chat = () => {
     }
   }
 
+  const handleStyleChange = async (style) => {
+    if (!activeChat) return
+    try {
+      await api.patch(`/chat/${activeChat._id}/style`, { responseStyle: style })
+      await loadChat(activeChat._id)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   const displayMessages = messages.length === 0 ? [WELCOME_MESSAGE] : messages
 
   return (
@@ -46,53 +57,71 @@ const Chat = () => {
 
       <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
         {/* Header */}
-        <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between shrink-0">
-          <h2 className="text-sm font-medium text-gray-300 truncate">
+        <div style={{ padding: '12px 24px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+          <h2 style={{ fontSize: '14px', fontWeight: '500', color: '#d1d5db', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {activeChat?.title || 'New Chat'}
           </h2>
           {activeChat && (
-            <span className="text-xs text-purple-400 bg-purple-500/10 px-2 py-1 rounded-full capitalize shrink-0 ml-2">
-              {activeChat.responseStyle}
-            </span>
+            <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+              {['gentle', 'analytical', 'brutal', 'hype', 'therapist'].map(style => (
+                <button
+                  key={style}
+                  onClick={() => handleStyleChange(style)}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: '999px',
+                    fontSize: '11px',
+                    fontWeight: '500',
+                    textTransform: 'capitalize',
+                    cursor: 'pointer',
+                    border: 'none',
+                    backgroundColor: activeChat.responseStyle === style ? '#9333ea' : 'rgba(255,255,255,0.05)',
+                    color: activeChat.responseStyle === style ? 'white' : '#9ca3af',
+                  }}
+                >
+                  {style}
+                </button>
+              ))}
+            </div>
           )}
         </div>
 
         {/* Messages */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column' }}>
           {!id ? (
-            <div className="h-full flex flex-col items-center justify-center text-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-2xl font-bold">V</div>
-              <h3 className="text-xl font-semibold">What's on your mind?</h3>
-              <p className="text-gray-500 text-sm max-w-sm">Start a new chat and tell Vela what's going on. No judgment, just clarity.</p>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', gap: '16px' }}>
+              <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'linear-gradient(135deg, #a855f7, #ec4899)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', fontWeight: 'bold' }}>V</div>
+              <h3 style={{ fontSize: '20px', fontWeight: '600' }}>What's on your mind?</h3>
+              <p style={{ color: '#6b7280', fontSize: '14px', maxWidth: '320px' }}>Start a new chat and tell Vela what's going on. No judgment, just clarity.</p>
               <button
                 onClick={async () => {
                   const chat = await createChat()
                   navigate(`/chat/${chat._id}`)
                 }}
-                className="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 rounded-xl text-sm font-medium transition-colors"
+                style={{ padding: '10px 20px', backgroundColor: '#9333ea', border: 'none', borderRadius: '12px', color: 'white', fontSize: '14px', fontWeight: '500', cursor: 'pointer' }}
               >
                 Start a new chat
               </button>
             </div>
           ) : (
-            <>
+            <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
               {displayMessages.map((msg) => (
                 <ChatBubble key={msg._id} message={msg} />
               ))}
               {sending && (
-                <div className="flex justify-start mb-4">
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xs font-bold mr-2 mt-1 shrink-0">V</div>
-                  <div className="bg-white/5 px-4 py-3 rounded-2xl rounded-bl-sm">
-                    <div className="flex gap-1 items-center h-4">
-                      <span className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                      <span className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                      <span className="w-1.5 h-1.5 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '16px' }}>
+                  <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'linear-gradient(135deg, #a855f7, #ec4899)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', marginRight: '8px', marginTop: '4px', flexShrink: 0 }}>V</div>
+                  <div style={{ backgroundColor: 'rgba(255,255,255,0.05)', padding: '12px 16px', borderRadius: '18px 18px 18px 4px' }}>
+                    <div style={{ display: 'flex', gap: '4px', alignItems: 'center', height: '16px' }}>
+                      <span style={{ width: '6px', height: '6px', backgroundColor: '#a855f7', borderRadius: '50%' }} />
+                      <span style={{ width: '6px', height: '6px', backgroundColor: '#a855f7', borderRadius: '50%' }} />
+                      <span style={{ width: '6px', height: '6px', backgroundColor: '#a855f7', borderRadius: '50%' }} />
                     </div>
                   </div>
                 </div>
               )}
               <div ref={bottomRef} />
-            </>
+            </div>
           )}
         </div>
 
