@@ -1,6 +1,6 @@
 const User = require('../models/User');
 
-const FREE_DAILY_LIMIT = 10;
+const FREE_DAILY_LIMIT = 1000;
 
 const checkMessageLimit = async (req, res, next) => {
   try {
