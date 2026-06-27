@@ -31,12 +31,16 @@ export const ChatProvider = ({ children }) => {
   }
 
   const sendMessage = async (chatId, content, inputType = 'text') => {
-    const userMsg = { role: 'user', content, _id: `temp-${Date.now()}`, inputType }
+    const tempId = `temp-${Date.now()}`
+    const userMsg = { role: 'user', content, _id: tempId, inputType }
     setMessages(prev => [...prev, userMsg])
 
     const res = await api.post(`/chat/${chatId}/message`, { content, inputType })
-    setMessages(prev => [...prev, res.data.message])
-
+    
+    // Replace temp message with real messages from DB
+    const chatRes = await api.get(`/chat/${chatId}`)
+    setMessages(chatRes.data.messages)
+    
     await fetchChats()
     return res.data.message
   }
