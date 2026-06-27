@@ -28,19 +28,25 @@ You help users discover insights themselves rather than just telling them what t
 // @POST /api/chat/new
 const createChat = async (req, res) => {
   try {
-    const { responseStyle, isPractice, practiceTarget, practiceMode } = req.body;
+    const { responseStyle, isPractice, practiceTarget, practiceMode } = req.body
+
+    const modeLabels = { easy: 'Easy', realistic: 'Realistic', hard: 'Hard', worst: 'Worst Case' }
+    const title = isPractice && practiceTarget
+      ? `${modeLabels[practiceMode] || 'Practice'} · ${practiceTarget}`
+      : 'New Chat'
 
     const chat = await Chat.create({
       userId: req.user._id,
+      title,
       responseStyle: responseStyle || req.user.defaultResponseStyle,
       isPractice: isPractice || false,
       practiceTarget: practiceTarget || '',
       practiceMode: practiceMode || 'realistic'
-    });
+    })
 
-    res.status(201).json(chat);
+    res.status(201).json(chat)
   } catch (err) {
-    res.status(500).json({ message: 'Failed to create chat', error: err.message });
+    res.status(500).json({ message: 'Failed to create chat', error: err.message })
   }
 };
 
@@ -82,18 +88,88 @@ const sendMessage = async (req, res) => {
       await User.findByIdAndUpdate(req.user._id, { $inc: { messagesUsedToday: 1 } });
     }
 
+    // Check if this is a debrief request
+    if (content === '[[DEBRIEF_REQUEST]]') {
+      const history = await Message.find({ chatId: chat._id }).sort({ createdAt: 1 });
+      
+      const debriefPrompt = `You are now stepping out of character. The practice conversation is over.
+
+Give the user a detailed debrief of how they handled the conversation with "${chat.practiceTarget}".
+
+Format your response exactly like this:
+
+## 📊 Practice Debrief
+
+**Overall Score: X/10**
+
+### ✅ What You Did Well
+- [specific things they did well based on the conversation]
+
+### ⚠️ What Hurt You
+- [specific mistakes or weak moments]
+
+### 🗑️ What to Remove
+- [filler phrases, bad habits, unnecessary things they said]
+
+### 🎯 One Thing to Focus On Next Time
+[single most important improvement]
+
+### 💬 Final Verdict
+[2-3 sentence honest summary of their performance]
+
+Base everything on the actual messages in this conversation. Be specific, honest, and constructive.`
+
+      const debriefCompletion = await groq.chat.completions.create({
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          { role: 'system', content: debriefPrompt },
+          ...history.map(m => ({ role: m.role, content: m.content }))
+        ],
+        max_tokens: 1024,
+        temperature: 0.7
+      })
+
+      const debriefResponse = debriefCompletion.choices[0].message.content
+
+      const debriefMessage = await Message.create({
+        chatId: chat._id,
+        role: 'assistant',
+        content: debriefResponse
+      })
+
+      await Chat.findByIdAndUpdate(chat._id, { updatedAt: new Date() })
+      return res.json({ message: debriefMessage })
+    }
+
     // Get chat history for context
     const history = await Message.find({ chatId: chat._id }).sort({ createdAt: 1 });
     const messages = history.map(m => ({ role: m.role, content: m.content }));
 
     // Build system prompt
-    const systemPrompt = RESPONSE_STYLES[chat.responseStyle] + `
-    
+    let systemPrompt
+
+    if (chat.isPractice) {
+      const modeInstructions = {
+        easy: 'You are cooperative, understanding, and open to the conversation.',
+        realistic: 'You react naturally and authentically, with realistic emotional responses.',
+        hard: 'You are defensive, dismissive, and not easy to talk to. You push back.',
+        worst: 'You are at your absolute worst — cold, reactive, and difficult. This prepares the user for anything.'
+      }
+      systemPrompt = `You are roleplaying as "${chat.practiceTarget}" in a practice conversation. 
+The user is practicing how to talk to you in real life.
+Difficulty: ${modeInstructions[chat.practiceMode] || modeInstructions.realistic}
+Stay in character. React as that person would. Keep responses short and natural like a real conversation.
+Do NOT introduce yourself as Vela. Do NOT break character. Do NOT give advice.
+Just respond as ${chat.practiceTarget} would.`
+    } else {
+      systemPrompt = RESPONSE_STYLES[chat.responseStyle] + `
+
 ${req.user.historySummary ? `USER HISTORY CONTEXT:\n${req.user.historySummary}` : ''}
 
 Always be concise but thorough. Format your response clearly.
 If you notice red flags, call them out compassionately.
-If the user is at fault, point it out kindly but honestly.`;
+If the user is at fault, point it out kindly but honestly.`
+    }
 
     // Call Groq
     const completion = await groq.chat.completions.create({
@@ -112,8 +188,8 @@ If the user is at fault, point it out kindly but honestly.`;
       content: aiResponse
     });
 
-    // Auto-title the chat after first message
-    if (history.length === 1) {
+    // Auto-title the chat after first message (only for regular chats)
+    if (history.length === 1 && !chat.isPractice) {
       const titleCompletion = await groq.chat.completions.create({
         model: 'llama-3.3-70b-versatile',
         messages: [{
