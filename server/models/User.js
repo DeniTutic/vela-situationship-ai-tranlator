@@ -6,10 +6,11 @@ const userSchema = new mongoose.Schema({
   passwordHash: { type: String, required: true },
   avatar: { type: String, default: '' },
   language: { type: String, enum: ['en', 'bs'], default: 'en' },
-  subscriptionStatus: { type: String, enum: ['free', 'premium'], default: 'free' },
+  subscriptionStatus: { type: String, enum: ['free', 'plus', 'pro'], default: 'free' },
   subscriptionExpiry: { type: Date, default: null },
   messagesUsedToday: { type: Number, default: 0 },
   messagesResetAt: { type: Date, default: Date.now },
+  practiceSessionsUsed: { type: Number, default: 0 },
   defaultResponseStyle: {
     type: String,
     enum: ['gentle', 'analytical', 'brutal', 'hype', 'therapist'],

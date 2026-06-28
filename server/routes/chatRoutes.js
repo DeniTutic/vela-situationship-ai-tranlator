@@ -1,11 +1,18 @@
 const express = require('express')
 const router = express.Router()
 const { protect } = require('../middleware/authMiddleware')
-const { checkMessageLimit } = require('../middleware/rateLimitMiddleware')
+const { checkMessageLimit, checkPracticeLimit } = require('../middleware/rateLimitMiddleware')
 const { createChat, getChats, getChatById, sendMessage, deleteChat, renameChat } = require('../controllers/chatController')
 const Chat = require('../models/Chat')
+const User = require('../models/User')
 
-router.post('/new', protect, createChat)
+router.post('/new', protect, async (req, res, next) => {
+  if (req.body.isPractice) {
+    return checkPracticeLimit(req, res, next)
+  }
+  next()
+}, createChat)
+
 router.get('/', protect, getChats)
 router.get('/:id', protect, getChatById)
 router.post('/:id/message', protect, checkMessageLimit, sendMessage)
