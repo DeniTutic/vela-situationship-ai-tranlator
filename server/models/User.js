@@ -17,6 +17,7 @@ const userSchema = new mongoose.Schema({
   },
   historySummary: { type: String, default: '' },
   historySummaryUpdatedAt: { type: Date, default: null },
+  onboardingCompleted: { type: Boolean, default: false },
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

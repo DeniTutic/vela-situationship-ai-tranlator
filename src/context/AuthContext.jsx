@@ -38,8 +38,12 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const completeOnboarding = () => {
+    setUser(prev => ({ ...prev, onboardingCompleted: true }));
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, signup, logout, completeOnboarding }}>
       {children}
     </AuthContext.Provider>
   );

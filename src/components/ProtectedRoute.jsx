@@ -1,16 +1,22 @@
-import { Navigate } from 'react-router-dom';
-import useAuth from '../hooks/useAuth';
+import { Navigate } from 'react-router-dom'
+import useAuth from '../hooks/useAuth'
 
 const ProtectedRoute = ({ children }) => {
-  const { user, loading } = useAuth();
+  const { user, loading } = useAuth()
 
   if (loading) return (
-    <div className="h-screen flex items-center justify-center bg-[#0f0f0f]">
-      <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+    <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#0f0f0f' }}>
+      <div style={{ width: '32px', height: '32px', border: '2px solid #a855f7', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
     </div>
-  );
+  )
 
-  return user ? children : <Navigate to="/login" />;
-};
+  if (!user) return <Navigate to="/login" />
 
-export default ProtectedRoute;
+  if (!user.onboardingCompleted && window.location.pathname !== '/onboarding') {
+    return <Navigate to="/onboarding" />
+  }
+
+  return children
+}
+
+export default ProtectedRoute

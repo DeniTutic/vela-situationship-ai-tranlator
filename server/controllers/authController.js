@@ -42,7 +42,8 @@ const signup = async (req, res) => {
       email: user.email,
       subscriptionStatus: user.subscriptionStatus,
       defaultResponseStyle: user.defaultResponseStyle,
-      language: user.language
+      language: user.language,
+      onboardingCompleted: user.onboardingCompleted
     });
   } catch (err) {
     res.status(500).json({ message: 'Signup failed', error: err.message });
@@ -74,7 +75,8 @@ const login = async (req, res) => {
       email: user.email,
       subscriptionStatus: user.subscriptionStatus,
       defaultResponseStyle: user.defaultResponseStyle,
-      language: user.language
+      language: user.language,
+      onboardingCompleted: user.onboardingCompleted
     });
   } catch (err) {
     res.status(500).json({ message: 'Login failed', error: err.message });
