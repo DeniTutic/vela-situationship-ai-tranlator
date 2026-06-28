@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState, forwardRef } from 'react'
 import { Send } from 'lucide-react'
 
-const InputBar = ({ onSend, disabled }) => {
+const InputBar = forwardRef(({ onSend, disabled }, ref) => {
   const [text, setText] = useState('')
 
   const handleSend = () => {
@@ -18,33 +18,52 @@ const InputBar = ({ onSend, disabled }) => {
   }
 
   return (
-    <div className="border-t border-white/5 px-4 py-4">
-      <div className="flex items-end gap-3 bg-white/5 border border-white/10 rounded-2xl px-4 py-3">
+    <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '16px 24px' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px', backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '12px 16px' }}>
         <textarea
+          ref={ref}
           value={text}
-          onChange={e => setText(e.target.value)}
+          onChange={e => {
+            setText(e.target.value)
+            e.target.style.height = 'auto'
+            e.target.style.height = Math.min(e.target.scrollHeight, 160) + 'px'
+          }}
           onKeyDown={handleKey}
           placeholder="What's going on? Tell me everything..."
-          rows={1}
           disabled={disabled}
-          className="flex-1 bg-transparent text-sm text-white placeholder-gray-600 outline-none resize-none max-h-40"
-          style={{ height: 'auto' }}
-          onInput={e => {
-            e.target.style.height = 'auto'
-            e.target.style.height = e.target.scrollHeight + 'px'
+          rows={1}
+          style={{
+            flex: 1, backgroundColor: 'transparent', border: 'none', outline: 'none',
+            color: 'white', fontSize: '14px', resize: 'none', lineHeight: '1.5',
+            fontFamily: 'inherit', maxHeight: '160px', overflow: 'auto'
           }}
         />
-        <button
-          onClick={handleSend}
-          disabled={!text.trim() || disabled}
-          className="w-8 h-8 bg-purple-600 hover:bg-purple-700 disabled:opacity-30 rounded-xl flex items-center justify-center transition-colors shrink-0"
-        >
-          <Send size={14} />
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+          <span style={{ fontSize: '11px', color: text.length > 800 ? '#f87171' : '#4b5563' }}>
+            {text.length}/1000
+          </span>
+          <button
+            onClick={handleSend}
+            disabled={!text.trim() || disabled}
+            style={{
+              width: '32px', height: '32px',
+              backgroundColor: text.trim() && !disabled ? '#9333ea' : 'rgba(255,255,255,0.05)',
+              border: 'none', borderRadius: '10px', display: 'flex', alignItems: 'center',
+              justifyContent: 'center', cursor: text.trim() && !disabled ? 'pointer' : 'default',
+              transition: 'background-color 0.2s', flexShrink: 0
+            }}
+          >
+            <Send size={14} color={text.trim() && !disabled ? 'white' : '#4b5563'} />
+          </button>
+        </div>
       </div>
-      <p className="text-xs text-gray-700 text-center mt-2">Press Enter to send · Shift+Enter for new line</p>
+      <p style={{ fontSize: '11px', color: '#374151', textAlign: 'center', marginTop: '8px' }}>
+        Enter to send · Shift+Enter for new line
+      </p>
     </div>
   )
-}
+})
+
+InputBar.displayName = 'InputBar'
 
 export default InputBar
