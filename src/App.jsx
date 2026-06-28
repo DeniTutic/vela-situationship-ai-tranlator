@@ -5,6 +5,7 @@ import Login from './pages/Login'
 import Signup from './pages/Signup'
 import Chat from './pages/Chat'
 import Profile from './pages/Profile'
+import Practice from './pages/Practice'
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
       <Route path="/chat/:id" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/" />} />
+      <Route path="/practice" element={<ProtectedRoute><Practice /></ProtectedRoute>} />
     </Routes>
   )
 }
