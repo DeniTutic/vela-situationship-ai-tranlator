@@ -1,35 +1,64 @@
 const User = require('../models/User');
 
-const FREE_DAILY_LIMIT = 1000;
+const LIMITS = {
+  free: { messages: 30, resetHours: 3 },
+  plus: { messages: 150, resetHours: 24 },
+  pro: { messages: 99999, resetHours: 24 }
+}
 
 const checkMessageLimit = async (req, res, next) => {
   try {
-    const user = req.user;
+    const user = req.user
+    const plan = user.subscriptionStatus || 'free'
+    const limit = LIMITS[plan] || LIMITS.free
 
-    if (user.subscriptionStatus === 'premium') return next();
+    const now = new Date()
+    const resetAt = new Date(user.messagesResetAt)
+    const hoursSinceReset = (now - resetAt) / (1000 * 60 * 60)
 
-    const now = new Date();
-    const resetAt = new Date(user.messagesResetAt);
-    const hoursSinceReset = (now - resetAt) / (1000 * 60 * 60);
-
-    // Reset counter if 24h have passed
-    if (hoursSinceReset >= 24) {
-      user.messagesUsedToday = 0;
-      user.messagesResetAt = now;
-      await user.save();
+    if (hoursSinceReset >= limit.resetHours) {
+      user.messagesUsedToday = 0
+      user.messagesResetAt = now
+      await user.save()
     }
 
-    if (user.messagesUsedToday >= FREE_DAILY_LIMIT) {
+    if (user.messagesUsedToday >= limit.messages) {
+      const resetTime = new Date(resetAt.getTime() + limit.resetHours * 60 * 60 * 1000)
+      const msUntilReset = resetTime - now
       return res.status(429).json({
-        message: 'Daily limit reached. Upgrade to premium for unlimited messages.',
-        limitReached: true
-      });
+        message: 'Message limit reached',
+        limitReached: true,
+        msUntilReset,
+        plan
+      })
     }
 
-    next();
+    next()
   } catch (err) {
-    return res.status(500).json({ message: 'Rate limit check failed' });
+    return res.status(500).json({ message: 'Rate limit check failed' })
   }
-};
+}
 
-module.exports = { checkMessageLimit };
+const checkPracticeLimit = async (req, res, next) => {
+  try {
+    const user = req.user
+    const plan = user.subscriptionStatus || 'free'
+
+    const practiceLimits = { free: 2, plus: 999, pro: 999 }
+    const limit = practiceLimits[plan]
+
+    if (user.practiceSessionsUsed >= limit) {
+      return res.status(429).json({
+        message: 'Practice limit reached',
+        practiceLimit: true,
+        plan
+      })
+    }
+
+    next()
+  } catch (err) {
+    return res.status(500).json({ message: 'Practice limit check failed' })
+  }
+}
+
+module.exports = { checkMessageLimit, checkPracticeLimit }

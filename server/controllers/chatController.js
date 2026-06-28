@@ -44,11 +44,16 @@ const createChat = async (req, res) => {
       practiceMode: practiceMode || 'realistic'
     })
 
+    // Track practice sessions for free users
+    if (isPractice) {
+      await User.findByIdAndUpdate(req.user._id, { $inc: { practiceSessionsUsed: 1 } })
+    }
+
     res.status(201).json(chat)
   } catch (err) {
     res.status(500).json({ message: 'Failed to create chat', error: err.message })
   }
-};
+}
 
 // @GET /api/chat
 const getChats = async (req, res) => {
@@ -74,6 +79,7 @@ const getChatById = async (req, res) => {
 };
 
 // @POST /api/chat/:id/message
+// @POST /api/chat/:id/message
 const sendMessage = async (req, res) => {
   try {
     const { content, inputType } = req.body;
@@ -91,7 +97,7 @@ const sendMessage = async (req, res) => {
     // Check if this is a debrief request
     if (content === '[[DEBRIEF_REQUEST]]') {
       const history = await Message.find({ chatId: chat._id }).sort({ createdAt: 1 });
-      
+
       const debriefPrompt = `You are now stepping out of character. The practice conversation is over.
 
 Give the user a detailed debrief of how they handled the conversation with "${chat.practiceTarget}".
@@ -130,7 +136,6 @@ Base everything on the actual messages in this conversation. Be specific, honest
       })
 
       const debriefResponse = debriefCompletion.choices[0].message.content
-
       const debriefMessage = await Message.create({
         chatId: chat._id,
         role: 'assistant',
@@ -147,7 +152,6 @@ Base everything on the actual messages in this conversation. Be specific, honest
 
     // Build system prompt
     let systemPrompt
-
     if (chat.isPractice) {
       const modeInstructions = {
         easy: 'You are cooperative, understanding, and open to the conversation.',
@@ -166,29 +170,45 @@ Just respond as ${chat.practiceTarget} would.`
 
 ${req.user.historySummary ? `USER HISTORY CONTEXT:\n${req.user.historySummary}` : ''}
 
-Always be concise but thorough. Format your response clearly.
+Keep responses concise and natural — from 1 sentence to a few paragraphs depending on what's needed.
 If you notice red flags, call them out compassionately.
 If the user is at fault, point it out kindly but honestly.`
     }
 
-    // Call Groq
-    const completion = await groq.chat.completions.create({
+    // Set up streaming headers
+    res.setHeader('Content-Type', 'text/event-stream')
+    res.setHeader('Cache-Control', 'no-cache')
+    res.setHeader('Connection', 'keep-alive')
+    res.flushHeaders()
+
+    // Stream from Groq
+    const stream = await groq.chat.completions.create({
       model: 'llama-3.3-70b-versatile',
       messages: [{ role: 'system', content: systemPrompt }, ...messages],
       max_tokens: 1024,
-      temperature: 0.8
-    });
+      temperature: 0.8,
+      stream: true
+    })
 
-    const aiResponse = completion.choices[0].message.content;
+    let fullResponse = ''
 
-    // Save AI message
+    for await (const chunk of stream) {
+      const delta = chunk.choices[0]?.delta?.content || ''
+      if (delta) {
+        fullResponse += delta
+        res.write(`data: ${JSON.stringify({ delta })}\n\n`)
+        await new Promise(resolve => setTimeout(resolve, 40))
+      }
+    }
+
+    // Save complete response to DB
     const aiMessage = await Message.create({
       chatId: chat._id,
       role: 'assistant',
-      content: aiResponse
-    });
+      content: fullResponse
+    })
 
-    // Auto-title the chat after first message (only for regular chats)
+    // Auto-title for regular chats
     if (history.length === 1 && !chat.isPractice) {
       const titleCompletion = await groq.chat.completions.create({
         model: 'llama-3.3-70b-versatile',
@@ -197,20 +217,22 @@ If the user is at fault, point it out kindly but honestly.`
           content: `Generate a short 4-6 word title for a relationship advice conversation that starts with: "${content}". Return only the title, nothing else.`
         }],
         max_tokens: 20
-      });
-
+      })
       await Chat.findByIdAndUpdate(chat._id, {
         title: titleCompletion.choices[0].message.content.trim()
-      });
+      })
     }
 
-    await Chat.findByIdAndUpdate(chat._id, { updatedAt: new Date() });
+    await Chat.findByIdAndUpdate(chat._id, { updatedAt: new Date() })
 
-    res.json({ message: aiMessage });
+    // Send done signal with message id
+    res.write(`data: ${JSON.stringify({ done: true, messageId: aiMessage._id })}\n\n`)
+    res.end()
+
   } catch (err) {
-    res.status(500).json({ message: 'Failed to send message', error: err.message });
+    res.status(500).json({ message: 'Failed to send message', error: err.message })
   }
-};
+}
 
 // @DELETE /api/chat/:id
 const deleteChat = async (req, res) => {
