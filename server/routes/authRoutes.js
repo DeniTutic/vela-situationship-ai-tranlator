@@ -20,5 +20,13 @@ router.patch('/profile', protect, async (req, res) => {
     res.status(500).json({ message: 'Failed to update profile' })
   }
 })
+router.patch('/onboarding', protect, async (req, res) => {
+  try {
+    await User.findByIdAndUpdate(req.user._id, { onboardingCompleted: true })
+    res.json({ success: true })
+  } catch (err) {
+    res.status(500).json({ message: 'Failed to update onboarding' })
+  }
+})
 
 module.exports = router
