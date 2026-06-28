@@ -8,6 +8,7 @@ export const ChatProvider = ({ children }) => {
   const [activeChat, setActiveChat] = useState(null)
   const [messages, setMessages] = useState([])
   const [loading, setLoading] = useState(false)
+  const [limitReached, setLimitReached] = useState(false)
 
   const fetchChats = async () => {
     const res = await api.get('/chat')
@@ -19,6 +20,7 @@ export const ChatProvider = ({ children }) => {
     setChats(prev => [res.data, ...prev])
     setActiveChat(res.data)
     setMessages([])
+    setLimitReached(false)
     return res.data
   }
 
@@ -27,22 +29,23 @@ export const ChatProvider = ({ children }) => {
     const res = await api.get(`/chat/${chatId}`)
     setActiveChat(res.data.chat)
     setMessages(res.data.messages)
+    setLimitReached(false)
     setLoading(false)
   }
 
   const sendMessage = async (chatId, content, inputType = 'text') => {
-    const tempId = `temp-${Date.now()}`
-    const userMsg = { role: 'user', content, _id: tempId, inputType }
-    setMessages(prev => [...prev, userMsg])
-
-    const res = await api.post(`/chat/${chatId}/message`, { content, inputType })
-    
-    // Replace temp message with real messages from DB
-    const chatRes = await api.get(`/chat/${chatId}`)
-    setMessages(chatRes.data.messages)
-    
-    await fetchChats()
-    return res.data.message
+    try {
+      const res = await api.post(`/chat/${chatId}/message`, { content, inputType })
+      const chatRes = await api.get(`/chat/${chatId}`)
+      setMessages(chatRes.data.messages)
+      await fetchChats()
+      return res.data.message
+    } catch (err) {
+      if (err.response?.status === 429) {
+        setLimitReached(true)
+      }
+      throw err
+    }
   }
 
   const deleteChat = async (chatId) => {
@@ -56,7 +59,7 @@ export const ChatProvider = ({ children }) => {
 
   return (
     <ChatContext.Provider value={{
-      chats, activeChat, messages, loading,
+      chats, activeChat, messages, loading, limitReached,
       fetchChats, createChat, loadChat, sendMessage, deleteChat, setActiveChat, setMessages
     }}>
       {children}
