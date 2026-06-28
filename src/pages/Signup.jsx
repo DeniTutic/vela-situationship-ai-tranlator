@@ -15,7 +15,7 @@ const Signup = () => {
     setLoading(true)
     try {
       await signup(form.name, form.email, form.password)
-      navigate('/chat')
+      navigate('/onboarding')
     } catch (err) {
       toast.error(err.response?.data?.message || 'Signup failed')
     } finally {
