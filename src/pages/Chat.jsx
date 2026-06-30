@@ -62,12 +62,14 @@ const Chat = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { activeChat, messages, loadChat, sendMessage, createChat, limitReached, msUntilReset, streamingMessage } = useChat()
+  const { user } = useAuth()
   const [sending, setSending] = useState(false)
   const [debriefing, setDebriefing] = useState(false)
+  const [showDebriefUpgrade, setShowDebriefUpgrade] = useState(false)
   const bottomRef = useRef(null)
   const inputRef = useRef(null)
-  const { user } = useAuth()
-  const [showDebriefUpgrade, setShowDebriefUpgrade] = useState(false)
+
+  const isPro = ['plus', 'pro'].includes(user?.subscriptionStatus)
 
   useEffect(() => {
     if (id) loadChat(id)
@@ -96,14 +98,22 @@ const Chat = () => {
     }
   }
 
+  const handleStyleChange = async (style) => {
+    if (!activeChat) return
+    try {
+      await api.patch(`/chat/${activeChat._id}/style`, { responseStyle: style })
+      await loadChat(activeChat._id)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   const handleDebrief = async () => {
     if (!id) return
-
-    if (!['plus', 'pro'].includes(user?.subscriptionStatus)) {
+    if (!isPro) {
       setShowDebriefUpgrade(true)
       return
     }
-
     setDebriefing(true)
     try {
       await sendMessage(id, '[[DEBRIEF_REQUEST]]', 'text')
@@ -123,6 +133,10 @@ const Chat = () => {
   const displayMessages = messages.length === 0
     ? [practiceWelcome]
     : messages.filter(m => m.content !== '[[DEBRIEF_REQUEST]]')
+
+  const freeModes = ['gentle', 'analytical']
+  const lockedModes = ['brutal', 'hype', 'therapist']
+  const allModes = [...freeModes, ...lockedModes]
 
   return (
     <div style={{ display: 'flex', height: '100vh', backgroundColor: '#0f0f0f', color: 'white', overflow: 'hidden' }}>
@@ -144,36 +158,27 @@ const Chat = () => {
                 {debriefing ? 'Analyzing...' : '🏁 End & Get Debrief'}
               </button>
             )}
-
-            {!activeChat?.isPractice && activeChat && (() => {
-              const freeModes = ['gentle', 'analytical']
-              const lockedModes = ['brutal', 'hype', 'therapist']
-              const isPro = ['plus', 'pro'].includes(user?.subscriptionStatus)
-              const allModes = [...freeModes, ...lockedModes]
-
-              return allModes.map(style => {
-                const isLocked = lockedModes.includes(style) && !isPro
-                const isActive = activeChat.responseStyle === style
-
-                return (
-                  <button
-                    key={style}
-                    onClick={() => isLocked ? navigate('/pricing') : handleStyleChange(style)}
-                    style={{
-                      padding: '4px 10px', borderRadius: '999px', fontSize: '11px',
-                      fontWeight: '500', textTransform: 'capitalize', cursor: 'pointer',
-                      border: isLocked ? '1px solid rgba(255,255,255,0.08)' : 'none',
-                      backgroundColor: isActive ? '#9333ea' : 'rgba(255,255,255,0.05)',
-                      color: isActive ? 'white' : isLocked ? '#4b5563' : '#9ca3af',
-                      display: 'flex', alignItems: 'center', gap: '4px'
-                    }}
-                  >
-                    {isLocked && <span style={{ fontSize: '9px' }}>🔒</span>}
-                    {style}
-                  </button>
-                )
-              })
-            })()}
+            {!activeChat?.isPractice && activeChat && allModes.map(style => {
+              const isLocked = lockedModes.includes(style) && !isPro
+              const isActive = activeChat.responseStyle === style
+              return (
+                <button
+                  key={style}
+                  onClick={() => isLocked ? navigate('/pricing') : handleStyleChange(style)}
+                  style={{
+                    padding: '4px 10px', borderRadius: '999px', fontSize: '11px',
+                    fontWeight: '500', textTransform: 'capitalize', cursor: 'pointer',
+                    border: isLocked ? '1px solid rgba(255,255,255,0.08)' : 'none',
+                    backgroundColor: isActive ? '#9333ea' : 'rgba(255,255,255,0.05)',
+                    color: isActive ? 'white' : isLocked ? '#4b5563' : '#9ca3af',
+                    display: 'flex', alignItems: 'center', gap: '4px'
+                  }}
+                >
+                  {isLocked && <span style={{ fontSize: '9px' }}>🔒</span>}
+                  {style}
+                </button>
+              )
+            })}
           </div>
         </div>
 
