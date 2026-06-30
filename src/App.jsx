@@ -7,6 +7,7 @@ import Chat from './pages/Chat'
 import Profile from './pages/Profile'
 import Practice from './pages/Practice'
 import Onboarding from './pages/Onboarding'
+import Pricing from './pages/Pricing'
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path="/practice" element={<ProtectedRoute><Practice /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/" />} />
+      <Route path="/pricing" element={<ProtectedRoute><Pricing /></ProtectedRoute>} />
     </Routes>
   )
 }
