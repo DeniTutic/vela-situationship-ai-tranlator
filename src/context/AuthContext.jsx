@@ -8,18 +8,19 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchMe = async () => {
-      try {
-        const res = await api.get('/auth/me');
-        setUser(res.data);
-      } catch {
-        setUser(null);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchMe();
   }, []);
+
+  const fetchMe = async () => {
+    try {
+      const res = await api.get('/auth/me');
+      setUser(res.data);
+    } catch {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const login = async (email, password) => {
     const res = await api.post('/auth/login', { email, password });
@@ -42,8 +43,12 @@ export const AuthProvider = ({ children }) => {
     setUser(prev => ({ ...prev, onboardingCompleted: true }));
   };
 
+  const refreshUser = async () => {
+    await fetchMe();
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout, completeOnboarding }}>
+    <AuthContext.Provider value={{ user, loading, login, signup, logout, completeOnboarding, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
