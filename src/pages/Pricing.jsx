@@ -82,13 +82,20 @@ const Pricing = () => {
   const [successMsg, setSuccessMsg] = useState('')
 
   useEffect(() => {
-    if (searchParams.get('success') === 'true') {
-      refreshUser()
-      setSuccessMsg('🎉 Welcome to Vela+! Your account has been upgraded.')
+    refreshUser()
+  }, [])
+
+  useEffect(() => {
+    const init = async () => {
+      if (searchParams.get('success') === 'true') {
+        await refreshUser()
+        setSuccessMsg('🎉 Welcome to Vela+! Your account has been upgraded.')
+      }
+      if (searchParams.get('canceled') === 'true') {
+        setSuccessMsg('Payment canceled — no charge was made.')
+      }
     }
-    if (searchParams.get('canceled') === 'true') {
-      setSuccessMsg('Payment canceled — no charge was made.')
-    }
+    init()
   }, [])
 
   const handleUpgrade = async (plan) => {
