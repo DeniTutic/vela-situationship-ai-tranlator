@@ -23,8 +23,8 @@ const PLANS = [
       'Voice & image input',
       'Unlimited practice',
     ],
-    cta: 'Current plan',
-    disabled: true
+    cta: 'Downgrade to Free',
+    disabled: false
   },
   {
     key: 'plus',
@@ -80,15 +80,13 @@ const Pricing = () => {
   const [searchParams] = useSearchParams()
   const { user, refreshUser } = useAuth()
   const [successMsg, setSuccessMsg] = useState('')
-
-  useEffect(() => {
-    refreshUser()
-  }, [])
+  const [refreshed, setRefreshed] = useState(false)
 
   useEffect(() => {
     const init = async () => {
+      await refreshUser()
+      setRefreshed(true)
       if (searchParams.get('success') === 'true') {
-        await refreshUser()
         setSuccessMsg('🎉 Welcome to Vela+! Your account has been upgraded.')
       }
       if (searchParams.get('canceled') === 'true') {
@@ -98,6 +96,12 @@ const Pricing = () => {
     init()
   }, [])
 
+  if (!refreshed) return (
+    <div style={{ height: '100vh', backgroundColor: '#0f0f0f', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ width: '32px', height: '32px', border: '2px solid #a855f7', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+    </div>
+  )
+  
   const handleUpgrade = async (plan) => {
     try {
       const res = await api.post('/stripe/create-checkout', { plan })
@@ -170,17 +174,16 @@ const Pricing = () => {
 
               <button
                 onClick={() => isCurrentPlan ? null : handleUpgrade(plan.key)}
-                disabled={isCurrentPlan}
+                disabled={isCurrentPlan || plan.key === 'free'}
                 style={{
                   padding: '12px', borderRadius: '12px', fontWeight: '600', fontSize: '14px',
-                  cursor: isCurrentPlan ? 'default' : 'pointer', border: 'none',
-                  background: isCurrentPlan ? 'rgba(255,255,255,0.05)' : plan.gradient || '#374151',
-                  color: isCurrentPlan ? '#4b5563' : 'white'
+                  cursor: isCurrentPlan || plan.key === 'free' ? 'default' : 'pointer', border: 'none',
+                  background: isCurrentPlan ? 'rgba(255,255,255,0.05)' : plan.key === 'free' ? 'rgba(255,255,255,0.03)' : plan.gradient || '#374151',
+                  color: isCurrentPlan ? '#4b5563' : plan.key === 'free' ? '#374151' : 'white'
                 }}
               >
-                {isCurrentPlan ? '✓ Current plan' : plan.cta}
+                {isCurrentPlan ? '✓ Current plan' : plan.key === 'free' ? 'Free forever' : plan.cta}
               </button>
-
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {plan.features.map((f, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
