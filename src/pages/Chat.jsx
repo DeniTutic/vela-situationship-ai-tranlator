@@ -61,7 +61,7 @@ const LimitBanner = ({ msUntilReset, onUpgrade }) => {
 const Chat = () => {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { activeChat, messages, loadChat, sendMessage, createChat, limitReached, msUntilReset, streamingMessage } = useChat()
+  const { activeChat, messages, loadChat, sendMessage, createChat, limitReached, msUntilReset, streamingMessage, fetchChats, setMessages, setLimitReached } = useChat()
   const { user } = useAuth()
   const [sending, setSending] = useState(false)
   const [debriefing, setDebriefing] = useState(false)
@@ -121,6 +121,38 @@ const Chat = () => {
       console.error(err)
     } finally {
       setDebriefing(false)
+    }
+  }
+
+  const handleImageUpload = async (file, caption = '') => {
+    if (!id) return
+    setSending(true)
+    try {
+      const formData = new FormData()
+      formData.append('image', file)
+      if (caption) formData.append('caption', caption)
+  
+      const response = await fetch(`/api/chat/${id}/upload-image`, {
+        method: 'POST',
+        credentials: 'include',
+        body: formData
+      })
+  
+      if (response.status === 429) {
+        setLimitReached(true)
+        return
+      }
+  
+      const data = await response.json()
+      
+      // Add image message to state with the actual image
+      const chatRes = await api.get(`/chat/${id}`)
+      setMessages(chatRes.data.messages)
+      await fetchChats()
+    } catch (err) {
+      console.error('Image upload failed', err)
+    } finally {
+      setSending(false)
     }
   }
 
@@ -237,8 +269,8 @@ const Chat = () => {
         )}
 
         {/* Input */}
-        {id && <InputBar ref={inputRef} onSend={handleSend} disabled={sending || debriefing || limitReached} />}
-      </div>
+        {id && <InputBar ref={inputRef} onSend={handleSend} onImageUpload={handleImageUpload} disabled={sending || debriefing || limitReached} />}
+        </div>
 
       {/* Debrief upgrade popup */}
       {showDebriefUpgrade && (
