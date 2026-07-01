@@ -19,18 +19,39 @@ const ChatBubble = ({ message }) => {
           marginRight: '8px', marginTop: '4px', flexShrink: 0
         }}>V</div>
       )}
-      <div style={{
-        maxWidth: '75%',
-        padding: '12px 16px',
-        borderRadius: isUser ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-        fontSize: '14px',
-        lineHeight: '1.6',
-        backgroundColor: isUser ? '#9333ea' : 'rgba(255,255,255,0.05)',
-        color: isUser ? 'white' : '#e5e7eb',
-      }}>
-        {isUser ? (
-          <p style={{ margin: 0 }}>{message.content}</p>
-        ) : (
+
+      {isUser ? (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', maxWidth: '75%', gap: '6px' }}>
+          {message.imageUrl && (
+            <img
+              src={message.imageUrl}
+              alt="shared screenshot"
+              style={{ maxWidth: '100%', maxHeight: '300px', borderRadius: '12px', objectFit: 'contain', border: '1px solid rgba(255,255,255,0.1)' }}
+            />
+          )}
+          {message.content && message.content !== '📸 Shared a screenshot for analysis' && (
+            <div style={{
+              padding: '12px 16px',
+              borderRadius: '18px 18px 4px 18px',
+              fontSize: '14px',
+              lineHeight: '1.6',
+              backgroundColor: '#9333ea',
+              color: 'white',
+            }}>
+              <p style={{ margin: 0 }}>{message.content}</p>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div style={{
+          maxWidth: '75%',
+          padding: '12px 16px',
+          borderRadius: '18px 18px 18px 4px',
+          fontSize: '14px',
+          lineHeight: '1.6',
+          backgroundColor: 'rgba(255,255,255,0.05)',
+          color: '#e5e7eb',
+        }}>
           <ReactMarkdown
             components={{
               p: ({ children }) => <p style={{ margin: '0 0 8px 0' }}>{children}</p>,
@@ -45,8 +66,8 @@ const ChatBubble = ({ message }) => {
           >
             {message.content}
           </ReactMarkdown>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }
