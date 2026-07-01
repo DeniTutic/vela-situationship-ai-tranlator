@@ -5,7 +5,8 @@ const messageSchema = new mongoose.Schema({
   role: { type: String, enum: ['user', 'assistant'], required: true },
   content: { type: String, required: true },
   inputType: { type: String, enum: ['text', 'voice', 'image', 'pdf'], default: 'text' },
-  attachments: [{ type: String }], // Cloudinary URLs
+  attachments: [{ type: String }],
+  imageUrl: { type: String, default: '' },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Message', messageSchema);
