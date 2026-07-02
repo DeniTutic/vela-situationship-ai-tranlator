@@ -1,15 +1,63 @@
-import { useState, forwardRef, useRef } from 'react'
-import { Send, ImagePlus, X } from 'lucide-react'
+import { useState, forwardRef, useRef, useEffect } from 'react'
+import { Send, ImagePlus, X, Mic, MicOff } from 'lucide-react'
 
 const InputBar = forwardRef(({ onSend, onImageUpload, disabled }, ref) => {
   const [text, setText] = useState('')
   const [imagePreview, setImagePreview] = useState(null)
   const [imageFile, setImageFile] = useState(null)
+  const [listening, setListening] = useState(false)
   const fileRef = useRef(null)
+  const recognitionRef = useRef(null)
+
+  useEffect(() => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) return
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    const recognition = new SpeechRecognition()
+    recognition.continuous = true
+    recognition.interimResults = true
+    recognition.lang = 'en-US'
+
+    recognition.onresult = (event) => {
+      let transcript = ''
+      for (let i = 0; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript
+      }
+      setText(transcript)
+    }
+
+    recognition.onend = () => {
+      setListening(false)
+    }
+
+    recognition.onerror = () => {
+      setListening(false)
+    }
+
+    recognitionRef.current = recognition
+  }, [])
+
+  const toggleListening = () => {
+    if (!recognitionRef.current) {
+      alert('Voice input is not supported in this browser. Try Chrome.')
+      return
+    }
+    if (listening) {
+      recognitionRef.current.stop()
+      setListening(false)
+    } else {
+      setText('')
+      recognitionRef.current.start()
+      setListening(true)
+    }
+  }
 
   const handleSend = () => {
     if ((!text.trim() && !imageFile) || disabled) return
-    
+    if (listening) {
+      recognitionRef.current.stop()
+      setListening(false)
+    }
     if (imageFile) {
       onImageUpload(imageFile, text.trim())
       setImageFile(null)
@@ -65,7 +113,7 @@ const InputBar = forwardRef(({ onSend, onImageUpload, disabled }, ref) => {
         </div>
       )}
 
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px', backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '12px 16px' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px', backgroundColor: listening ? 'rgba(168,85,247,0.08)' : 'rgba(255,255,255,0.05)', border: `1px solid ${listening ? 'rgba(168,85,247,0.4)' : 'rgba(255,255,255,0.08)'}`, borderRadius: '16px', padding: '12px 16px', transition: 'all 0.2s' }}>
         <textarea
           ref={ref}
           value={text}
@@ -75,7 +123,7 @@ const InputBar = forwardRef(({ onSend, onImageUpload, disabled }, ref) => {
             e.target.style.height = Math.min(e.target.scrollHeight, 160) + 'px'
           }}
           onKeyDown={handleKey}
-          placeholder={imageFile ? "Add a message (optional)..." : "What's going on? Tell me everything..."}
+          placeholder={listening ? '🎙️ Listening...' : imageFile ? 'Add a message (optional)...' : "What's going on? Tell me everything..."}
           disabled={disabled}
           rows={1}
           style={{
@@ -88,13 +136,7 @@ const InputBar = forwardRef(({ onSend, onImageUpload, disabled }, ref) => {
           <span style={{ fontSize: '11px', color: text.length > 800 ? '#f87171' : '#4b5563' }}>
             {text.length}/1000
           </span>
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-            style={{ display: 'none' }}
-          />
+          <input ref={fileRef} type="file" accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} />
           <button
             onClick={() => fileRef.current?.click()}
             disabled={disabled}
@@ -107,6 +149,20 @@ const InputBar = forwardRef(({ onSend, onImageUpload, disabled }, ref) => {
             }}
           >
             <ImagePlus size={14} color={imageFile ? '#a855f7' : '#6b7280'} />
+          </button>
+          <button
+            onClick={toggleListening}
+            disabled={disabled}
+            title={listening ? 'Stop listening' : 'Voice input'}
+            style={{
+              width: '32px', height: '32px',
+              backgroundColor: listening ? 'rgba(236,72,153,0.2)' : 'rgba(255,255,255,0.05)',
+              border: 'none', borderRadius: '10px', display: 'flex', alignItems: 'center',
+              justifyContent: 'center', cursor: disabled ? 'default' : 'pointer', flexShrink: 0,
+              animation: listening ? 'pulse 1.5s infinite' : 'none'
+            }}
+          >
+            {listening ? <MicOff size={14} color="#ec4899" /> : <Mic size={14} color="#6b7280" />}
           </button>
           <button
             onClick={handleSend}
