@@ -125,14 +125,14 @@ Format your response exactly like this:
 
 Base everything on the actual messages in this conversation. Be specific, honest, and constructive.`
 
-      const debriefCompletion = await groq.chat.completions.create({
+      const maxTokens = { free: 300, plus: 600, pro: 1200 }
+      const plan = req.user.subscriptionStatus || 'free'
+
+      const completion = await groq.chat.completions.create({
         model: 'llama-3.3-70b-versatile',
-        messages: [
-          { role: 'system', content: debriefPrompt },
-          ...history.map(m => ({ role: m.role, content: m.content }))
-        ],
-        max_tokens: 1024,
-        temperature: 0.7
+        messages: [{ role: 'system', content: systemPrompt }, ...messages],
+        max_tokens: maxTokens[plan] || 300,
+        temperature: 0.8
       })
 
       const debriefResponse = debriefCompletion.choices[0].message.content
@@ -165,15 +165,24 @@ Difficulty: ${modeInstructions[chat.practiceMode] || modeInstructions.realistic}
 Stay in character. React as that person would. Keep responses short and natural like a real conversation.
 Do NOT introduce yourself as Vela. Do NOT break character. Do NOT give advice.
 Just respond as ${chat.practiceTarget} would.`
-    } else {
+  } else {
+      const lengthInstruction = {
+        free: 'Keep responses SHORT — 1 to 3 sentences max. Be direct and warm. Only go longer if the user explicitly asks.',
+        plus: 'Keep responses MEDIUM length — a few sentences to a short paragraph. Be warm, clear, and helpful. Don\'t over-explain.',
+        pro: 'Give DETAILED, thorough responses. Include deeper analysis, patterns, red flags, and actionable advice. Be comprehensive but readable.'
+      }
+
+      const plan = req.user.subscriptionStatus || 'free'
+      const length = lengthInstruction[plan] || lengthInstruction.free
+
       systemPrompt = RESPONSE_STYLES[chat.responseStyle] + `
 
-${req.user.historySummary ? `USER HISTORY CONTEXT:\n${req.user.historySummary}` : ''}
+      ${req.user.historySummary ? `USER HISTORY CONTEXT:\n${req.user.historySummary}` : ''}
 
-Keep responses concise and natural — from 1 sentence to a few paragraphs depending on what's needed.
-If you notice red flags, call them out compassionately.
-If the user is at fault, point it out kindly but honestly.`
-    }
+      RESPONSE LENGTH: ${length}
+      If you notice red flags, call them out compassionately.
+      If the user is at fault, point it out kindly but honestly.`
+  }
 
     // Set up streaming headers
     res.setHeader('Content-Type', 'text/event-stream')
