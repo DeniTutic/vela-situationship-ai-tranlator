@@ -131,8 +131,7 @@ export const ChatProvider = ({ children }) => {
     <ChatContext.Provider value={{
       chats, activeChat, messages, loading, limitReached, msUntilReset,
       practiceLimit, setPracticeLimit, streamingMessage,
-      fetchChats, createChat, loadChat, sendMessage, deleteChat, setActiveChat, setMessages
-    }}>
+      fetchChats, createChat, loadChat, sendMessage, deleteChat, setActiveChat, setMessages, setStreamingMessage}}>
       {children}
     </ChatContext.Provider>
   )
