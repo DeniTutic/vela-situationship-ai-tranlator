@@ -144,9 +144,22 @@ const Chat = () => {
       }
   
       const data = await response.json()
-      
-      // Add image message to state with the actual image
+      const aiContent = data.message.content
+  
+      // Animate the response like streaming
       const chatRes = await api.get(`/chat/${id}`)
+      const messagesWithoutAi = chatRes.data.messages.filter(m => m._id !== data.message._id)
+      setMessages(messagesWithoutAi)
+  
+      let displayed = ''
+      const words = aiContent.split('')
+      for (let i = 0; i < words.length; i++) {
+        displayed += words[i]
+        setStreamingMessage(displayed)
+        await new Promise(r => setTimeout(r, 20))
+      }
+  
+      setStreamingMessage('')
       setMessages(chatRes.data.messages)
       await fetchChats()
     } catch (err) {
