@@ -40,7 +40,10 @@ const Sidebar = () => {
       display: 'flex', flexDirection: 'column', flexShrink: 0
     }}>
       {/* Logo */}
-      <div style={{ padding: '20px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div
+        onClick={() => navigate('/')}
+        style={{ padding: '20px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
+      >
         <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'linear-gradient(135deg, #a855f7, #ec4899)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'white' }}>V</div>
         <span style={{ fontWeight: '600', color: 'white' }}>Vela</span>
       </div>
