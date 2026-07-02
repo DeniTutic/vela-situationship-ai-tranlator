@@ -61,7 +61,7 @@ const LimitBanner = ({ msUntilReset, onUpgrade }) => {
 const Chat = () => {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { activeChat, messages, loadChat, sendMessage, createChat, limitReached, msUntilReset, streamingMessage, fetchChats, setMessages, setLimitReached } = useChat()
+  const { activeChat, messages, loadChat, sendMessage, createChat, limitReached, msUntilReset, streamingMessage, setStreamingMessage, fetchChats, setMessages, setLimitReached } = useChat()
   const { user } = useAuth()
   const [sending, setSending] = useState(false)
   const [debriefing, setDebriefing] = useState(false)
@@ -140,31 +140,35 @@ const Chat = () => {
   
       if (response.status === 429) {
         setLimitReached(true)
+        setSending(false)
         return
       }
   
       const data = await response.json()
       const aiContent = data.message.content
   
-      // Animate the response like streaming
+      // Load messages first (includes user image message + ai message)
       const chatRes = await api.get(`/chat/${id}`)
-      const messagesWithoutAi = chatRes.data.messages.filter(m => m._id !== data.message._id)
-      setMessages(messagesWithoutAi)
+      const allMessages = chatRes.data.messages
   
+      // Show all messages except the final AI one (we'll stream it)
+      const withoutLastAi = allMessages.slice(0, -1)
+      setMessages(withoutLastAi)
+      setSending(false)
+  
+      // Stream the AI response character by character
       let displayed = ''
-      const words = aiContent.split('')
-      for (let i = 0; i < words.length; i++) {
-        displayed += words[i]
+      for (let i = 0; i < aiContent.length; i++) {
+        displayed += aiContent[i]
         setStreamingMessage(displayed)
-        await new Promise(r => setTimeout(r, 20))
+        await new Promise(r => setTimeout(r, 15))
       }
   
       setStreamingMessage('')
-      setMessages(chatRes.data.messages)
+      setMessages(allMessages)
       await fetchChats()
     } catch (err) {
       console.error('Image upload failed', err)
-    } finally {
       setSending(false)
     }
   }
@@ -190,9 +194,11 @@ const Chat = () => {
       <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
         {/* Header */}
         <div style={{ padding: '12px 24px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
           <h2 style={{ fontSize: '14px', fontWeight: '500', color: '#d1d5db', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {activeChat?.title || 'New Chat'}
           </h2>
+        </div>
           <div style={{ display: 'flex', gap: '6px', flexShrink: 0, alignItems: 'center' }}>
             {activeChat?.isPractice && (
               <button
