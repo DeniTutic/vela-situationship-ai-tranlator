@@ -103,8 +103,8 @@ export const ChatProvider = ({ children }) => {
                   _id: data.messageId || `ai-${Date.now()}`
                 }
                 setMessages(prev => {
-                  const withoutTemp = prev.filter(m => !m._id?.toString().startsWith('temp-'))
-                  return [...withoutTemp, userMsg, aiMsg]
+                  const withoutTemp = prev.filter(m => m._id !== tempId)
+                  return [...withoutTemp, aiMsg]
                 })
                 setStreamingMessage('')
                 await fetchChats()
