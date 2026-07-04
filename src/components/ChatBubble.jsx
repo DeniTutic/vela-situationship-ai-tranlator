@@ -6,51 +6,75 @@ const ChatBubble = ({ message }) => {
   return (
     <div style={{
       display: 'flex',
+      flexDirection: 'row',
       justifyContent: isUser ? 'flex-end' : 'flex-start',
+      alignItems: 'flex-start',
       marginBottom: '16px',
-      width: '100%'
+      width: '100%',
+      boxSizing: 'border-box'
     }}>
       {!isUser && (
         <div style={{
-          width: '28px', height: '28px', borderRadius: '50%',
+          width: '28px',
+          height: '28px',
+          borderRadius: '50%',
           background: 'linear-gradient(135deg, #a855f7, #ec4899)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '12px', fontWeight: 'bold', color: 'white',
-          marginRight: '8px', marginTop: '4px', flexShrink: 0
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '12px',
+          fontWeight: 'bold',
+          color: 'white',
+          marginRight: '8px',
+          flexShrink: 0
         }}>V</div>
       )}
 
       {isUser ? (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', maxWidth: '75%', gap: '6px' }}>
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-end',
+          maxWidth: '70%',
+          gap: '6px'
+        }}>
           {message.imageUrl && (
             <img
               src={message.imageUrl}
               alt="shared screenshot"
-              style={{ maxWidth: '100%', maxHeight: '300px', borderRadius: '12px', objectFit: 'contain', border: '1px solid rgba(255,255,255,0.1)' }}
+              style={{
+                maxWidth: '100%',
+                maxHeight: '250px',
+                borderRadius: '12px',
+                objectFit: 'contain',
+                border: '1px solid rgba(255,255,255,0.1)'
+              }}
             />
           )}
           {message.content && message.content !== '📸 Shared a screenshot for analysis' && (
             <div style={{
-              padding: '12px 16px',
+              padding: '10px 14px',
               borderRadius: '18px 18px 4px 18px',
               fontSize: '14px',
-              lineHeight: '1.6',
+              lineHeight: '1.5',
               backgroundColor: '#9333ea',
               color: 'white',
+              wordBreak: 'break-word'
             }}>
-              <p style={{ margin: 0 }}>{message.content}</p>
+              {message.content}
             </div>
           )}
         </div>
       ) : (
         <div style={{
-          maxWidth: '75%',
-          padding: '12px 16px',
+          maxWidth: '70%',
+          padding: '10px 14px',
           borderRadius: '18px 18px 18px 4px',
           fontSize: '14px',
           lineHeight: '1.6',
-          backgroundColor: 'rgba(255,255,255,0.05)',
+          backgroundColor: 'rgba(255,255,255,0.06)',
           color: '#e5e7eb',
+          wordBreak: 'break-word'
         }}>
           <ReactMarkdown
             components={{
