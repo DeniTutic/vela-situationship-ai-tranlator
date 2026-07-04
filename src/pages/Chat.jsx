@@ -234,7 +234,7 @@ const Chat = () => {
         </div>
 
         {/* Messages */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
           {!id ? (
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', gap: '16px' }}>
               <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'linear-gradient(135deg, #a855f7, #ec4899)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', fontWeight: 'bold' }}>V</div>
@@ -251,7 +251,7 @@ const Chat = () => {
               </button>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'stretch' }}>
               {displayMessages.map((msg) => (
                 <ChatBubble key={msg._id} message={msg} />
               ))}
