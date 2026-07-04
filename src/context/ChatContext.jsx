@@ -97,16 +97,9 @@ export const ChatProvider = ({ children }) => {
                 setStreamingMessage(accumulated)
               }
               if (data.done) {
-                const aiMsg = {
-                  role: 'assistant',
-                  content: accumulated,
-                  _id: data.messageId || `ai-${Date.now()}`
-                }
-                setMessages(prev => {
-                  const withoutTemp = prev.filter(m => m._id !== tempId)
-                  return [...withoutTemp, aiMsg]
-                })
                 setStreamingMessage('')
+                const chatRes = await api.get(`/chat/${chatId}`)
+                setMessages(chatRes.data.messages)
                 await fetchChats()
               }
             } catch {}
@@ -131,7 +124,8 @@ export const ChatProvider = ({ children }) => {
     <ChatContext.Provider value={{
       chats, activeChat, messages, loading, limitReached, msUntilReset,
       practiceLimit, setPracticeLimit, streamingMessage,
-      fetchChats, createChat, loadChat, sendMessage, deleteChat, setActiveChat, setMessages, setStreamingMessage}}>
+      fetchChats, createChat, loadChat, sendMessage, deleteChat, setActiveChat, setMessages, setStreamingMessage
+    }}>
       {children}
     </ChatContext.Provider>
   )
