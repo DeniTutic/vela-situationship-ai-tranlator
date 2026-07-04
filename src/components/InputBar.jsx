@@ -96,6 +96,7 @@ const InputBar = forwardRef(({ onSend, onImageUpload, disabled }, ref) => {
 
   return (
     <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '12px 24px' }}>
+    <div style={{ maxWidth: '760px', margin: '0 auto' }}> 
       {/* Image preview */}
       {imagePreview && (
         <div style={{ marginBottom: '8px', position: 'relative', display: 'inline-block' }}>
@@ -182,6 +183,7 @@ const InputBar = forwardRef(({ onSend, onImageUpload, disabled }, ref) => {
       <p style={{ fontSize: '11px', color: '#374151', textAlign: 'center', marginTop: '8px' }}>
         Enter to send · Shift+Enter for new line
       </p>
+    </div>
     </div>
   )
 })
