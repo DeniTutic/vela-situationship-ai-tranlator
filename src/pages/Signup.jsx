@@ -1,11 +1,10 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import useAuth from '../hooks/useAuth'
+import api from '../utils/api'
 import toast from 'react-hot-toast'
 
 const Signup = () => {
   const navigate = useNavigate()
-  const { signup } = useAuth()
   const [form, setForm] = useState({ name: '', email: '', password: '' })
   const [loading, setLoading] = useState(false)
 
@@ -14,8 +13,8 @@ const Signup = () => {
     if (form.password.length < 6) return toast.error('Password must be at least 6 characters')
     setLoading(true)
     try {
-      await signup(form.name, form.email, form.password)
-      navigate('/onboarding')
+      await api.post('/auth/signup', form)
+      navigate('/verify-email', { state: { email: form.email } })
     } catch (err) {
       toast.error(err.response?.data?.message || 'Signup failed')
     } finally {
@@ -24,52 +23,30 @@ const Signup = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0f0f0f] text-white flex flex-col items-center justify-center px-4">
-      <div className="w-full max-w-sm">
-        <div className="flex items-center gap-2 justify-center mb-8">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-sm font-bold">V</div>
-          <span className="font-semibold text-lg">Vela</span>
+    <div style={{ minHeight: '100vh', backgroundColor: '#0f0f0f', color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+      <div style={{ width: '100%', maxWidth: '380px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'linear-gradient(135deg, #a855f7, #ec4899)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 'bold', margin: '0 auto 16px', cursor: 'pointer' }} onClick={() => navigate('/')}>V</div>
+          <h1 style={{ fontSize: '22px', fontWeight: '700', marginBottom: '6px' }}>Create your account</h1>
+          <p style={{ color: '#9ca3af', fontSize: '14px' }}>Start getting clarity today</p>
         </div>
-        <h2 className="text-2xl font-bold text-center mb-2">Create your account</h2>
-        <p className="text-gray-400 text-center text-sm mb-8">Start getting clarity today</p>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <input
-            type="text"
-            placeholder="Your name"
-            value={form.name}
-            onChange={e => setForm({ ...form, name: e.target.value })}
-            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-purple-500 transition-colors"
-            required
-          />
-          <input
-            type="email"
-            placeholder="Email"
-            value={form.email}
-            onChange={e => setForm({ ...form, email: e.target.value })}
-            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-purple-500 transition-colors"
-            required
-          />
-          <input
-            type="password"
-            placeholder="Password (min 6 characters)"
-            value={form.password}
-            onChange={e => setForm({ ...form, password: e.target.value })}
-            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm outline-none focus:border-purple-500 transition-colors"
-            required
-          />
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-purple-600 hover:bg-purple-700 disabled:opacity-50 rounded-xl py-3 text-sm font-medium transition-colors"
-          >
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <input type="text" placeholder="Your name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
+            required style={{ backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '12px 16px', color: 'white', fontSize: '14px', outline: 'none' }} />
+          <input type="email" placeholder="Email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })}
+            required style={{ backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '12px 16px', color: 'white', fontSize: '14px', outline: 'none' }} />
+          <input type="password" placeholder="Password (min 6 characters)" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })}
+            required style={{ backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '12px 16px', color: 'white', fontSize: '14px', outline: 'none' }} />
+          <button type="submit" disabled={loading}
+            style={{ padding: '13px', background: 'linear-gradient(135deg, #9333ea, #7c3aed)', border: 'none', borderRadius: '12px', color: 'white', fontSize: '14px', fontWeight: '600', cursor: 'pointer', opacity: loading ? 0.7 : 1 }}>
             {loading ? 'Creating account...' : 'Create account'}
           </button>
         </form>
 
-        <p className="text-center text-sm text-gray-400 mt-6">
+        <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '13px', color: '#6b7280' }}>
           Already have an account?{' '}
-          <Link to="/login" className="text-purple-400 hover:text-purple-300">Log in</Link>
+          <Link to="/login" style={{ color: '#a855f7', textDecoration: 'none', fontWeight: '600' }}>Log in</Link>
         </p>
       </div>
     </div>
