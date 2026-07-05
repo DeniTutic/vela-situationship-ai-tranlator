@@ -19,6 +19,11 @@ const userSchema = new mongoose.Schema({
   historySummary: { type: String, default: '' },
   historySummaryUpdatedAt: { type: Date, default: null },
   onboardingCompleted: { type: Boolean, default: false },
+  isEmailVerified: { type: Boolean, default: false },
+  verificationCode: { type: String, default: null },
+  verificationCodeExpiry: { type: Date, default: null },
+  passwordResetCode: { type: String, default: null },
+  passwordResetCodeExpiry: { type: Date, default: null },
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);
