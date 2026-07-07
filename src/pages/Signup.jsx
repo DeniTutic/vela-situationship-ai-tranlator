@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import api from '../utils/api'
 import toast from 'react-hot-toast'
+import GoogleButton from '../components/GoogleButton'
 
 const Signup = () => {
   const navigate = useNavigate()
@@ -29,6 +30,14 @@ const Signup = () => {
           <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'linear-gradient(135deg, #a855f7, #ec4899)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: 'bold', margin: '0 auto 16px', cursor: 'pointer' }} onClick={() => navigate('/')}>V</div>
           <h1 style={{ fontSize: '22px', fontWeight: '700', marginBottom: '6px' }}>Create your account</h1>
           <p style={{ color: '#9ca3af', fontSize: '14px' }}>Start getting clarity today</p>
+        </div>
+
+        <GoogleButton />
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '20px 0' }}>
+          <div style={{ flex: 1, height: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
+          <span style={{ color: '#6b7280', fontSize: '12px' }}>or</span>
+          <div style={{ flex: 1, height: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>

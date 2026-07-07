@@ -1,14 +1,25 @@
-import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import useAuth from '../hooks/useAuth'
 import api from '../utils/api'
 import toast from 'react-hot-toast'
+import GoogleButton from '../components/GoogleButton'
 
 const Login = () => {
   const navigate = useNavigate()
   const { login } = useAuth()
+  const [searchParams] = useSearchParams()
   const [form, setForm] = useState({ email: '', password: '' })
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    const error = searchParams.get('error')
+    if (error === 'google_email_unverified') {
+      toast.error('Your Google email must be verified to sign in')
+    } else if (error === 'google_auth_failed') {
+      toast.error('Google sign-in failed. Please try again')
+    }
+  }, [searchParams])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -36,22 +47,28 @@ const Login = () => {
           <p style={{ color: '#9ca3af', fontSize: '14px' }}>Log in to your account</p>
         </div>
 
+        <GoogleButton />
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '20px 0' }}>
+          <div style={{ flex: 1, height: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
+          <span style={{ color: '#6b7280', fontSize: '12px' }}>or</span>
+          <div style={{ flex: 1, height: '1px', backgroundColor: 'rgba(255,255,255,0.1)' }} />
+        </div>
+
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           <input type="email" placeholder="Email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })}
             required style={{ backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '12px 16px', color: 'white', fontSize: '14px', outline: 'none' }} />
           <input type="password" placeholder="Password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })}
             required style={{ backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '12px 16px', color: 'white', fontSize: '14px', outline: 'none' }} />
-          
+
           <div style={{ textAlign: 'right' }}>
             <Link to="/forgot-password" style={{ color: '#9ca3af', fontSize: '13px', textDecoration: 'none' }}>Forgot password?</Link>
           </div>
-
           <button type="submit" disabled={loading}
             style={{ padding: '13px', background: 'linear-gradient(135deg, #9333ea, #7c3aed)', border: 'none', borderRadius: '12px', color: 'white', fontSize: '14px', fontWeight: '600', cursor: 'pointer', opacity: loading ? 0.7 : 1 }}>
             {loading ? 'Logging in...' : 'Log in'}
           </button>
         </form>
-
         <p style={{ textAlign: 'center', marginTop: '20px', fontSize: '13px', color: '#6b7280' }}>
           Don't have an account?{' '}
           <Link to="/signup" style={{ color: '#a855f7', textDecoration: 'none', fontWeight: '600' }}>Sign up</Link>
@@ -60,5 +77,4 @@ const Login = () => {
     </div>
   )
 }
-
 export default Login
