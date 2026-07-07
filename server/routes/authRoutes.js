@@ -3,7 +3,10 @@ const router = express.Router()
 const { signup, login, logout, getMe, verifyEmail, resendCode, forgotPassword, resetPassword } = require('../controllers/authController')
 const { protect } = require('../middleware/authMiddleware')
 const User = require('../models/User')
+const { initiateGoogleAuth, googleCallback } = require('../controllers/googleAuthController');
 
+router.get('/google', initiateGoogleAuth);
+router.get('/google/callback', googleCallback);
 router.post('/signup', signup)
 router.post('/verify-email', verifyEmail)
 router.post('/resend-code', resendCode)
