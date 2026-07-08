@@ -29,6 +29,9 @@ const userSchema = new mongoose.Schema({
   verificationCodeExpiry: { type: Date, default: null },
   passwordResetCode: { type: String, default: null },
   passwordResetCodeExpiry: { type: Date, default: null },
+  voiceSessionsUsedToday: { type: Number, default: 0 },
+  voiceSessionsResetAt: { type: Date, default: Date.now },
 }, { timestamps: true });
+
 
 module.exports = mongoose.model('User', userSchema);
