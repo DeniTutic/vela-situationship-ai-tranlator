@@ -7,6 +7,7 @@ import InputBar from '../components/InputBar'
 import useChat from '../hooks/useChat'
 import api from '../utils/api'
 import ReactMarkdown from 'react-markdown'
+import VoiceMode from '../components/VoiceMode'
 
 const WELCOME_MESSAGE = {
   role: 'assistant',
@@ -68,6 +69,7 @@ const Chat = () => {
   const [showDebriefUpgrade, setShowDebriefUpgrade] = useState(false)
   const bottomRef = useRef(null)
   const inputRef = useRef(null)
+  const [showVoice, setShowVoice] = useState(false)
 
   const isPro = ['plus', 'pro'].includes(user?.subscriptionStatus)
 
@@ -96,6 +98,11 @@ const Chat = () => {
       setSending(false)
       setTimeout(() => inputRef.current?.focus(), 100)
     }
+  }
+  const handleVoiceMessage = async (transcript) => {
+    const reply = await sendMessage(id, transcript)
+    if (!reply) throw new Error('No reply received')
+    return reply
   }
 
   const handleStyleChange = async (style) => {
@@ -209,6 +216,22 @@ const Chat = () => {
                 {debriefing ? 'Analyzing...' : '🏁 End & Get Debrief'}
               </button>
             )}
+                      <button
+                      onClick={() => {
+                        if (!isPro) { navigate('/pricing'); return }
+                        setShowVoice(v => !v)
+                      }}
+                      style={{
+                        padding: '4px 12px', borderRadius: '999px', fontSize: '11px', fontWeight: '600',
+                        cursor: 'pointer', border: 'none', marginRight: '8px',
+                        backgroundColor: showVoice ? '#9333ea' : 'rgba(255,255,255,0.05)',
+                        color: isPro ? 'white' : '#4b5563',
+                        display: 'flex', alignItems: 'center', gap: '4px'
+                      }}
+          >
+            {!isPro && <span style={{ fontSize: '9px' }}>🔒</span>}
+            🎙️ Voice
+          </button>
             {!activeChat?.isPractice && activeChat && allModes.map(style => {
               const isLocked = lockedModes.includes(style) && !isPro
               const isActive = activeChat.responseStyle === style
@@ -285,7 +308,14 @@ const Chat = () => {
         {id && limitReached && (
           <LimitBanner msUntilReset={msUntilReset} onUpgrade={() => navigate('/pricing')} />
         )}
-
+        {id && showVoice && (
+          <div style={{ padding: '20px 24px', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'center' }}>
+            <VoiceMode
+              onUserSpeech={handleVoiceMessage}
+              onSessionEnd={() => setShowVoice(false)}
+            />
+          </div>
+        )}
         {/* Input */}
         {id && <InputBar ref={inputRef} onSend={handleSend} onImageUpload={handleImageUpload} disabled={sending || debriefing || limitReached} />}
         </div>
