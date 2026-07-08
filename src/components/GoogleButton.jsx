@@ -1,14 +1,19 @@
+import { motion } from 'framer-motion'
+ 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080'
-
+ 
 const GoogleButton = () => {
   const handleClick = () => {
     window.location.href = `${API_URL}/api/auth/google`
   }
-
+ 
   return (
-    <button
+    <motion.button
       type="button"
       onClick={handleClick}
+      whileHover={{ scale: 1.02, backgroundColor: 'rgba(255,255,255,0.08)' }}
+      whileTap={{ scale: 0.97 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 20 }}
       style={{
         display: 'flex',
         alignItems: 'center',
@@ -32,8 +37,8 @@ const GoogleButton = () => {
         <path fill="#EA4335" d="M9 3.58c1.32 0 2.51.46 3.44 1.35l2.59-2.59C13.46.89 11.43 0 9 0A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/>
       </svg>
       Continue with Google
-    </button>
+    </motion.button>
   )
 }
-
+ 
 export default GoogleButton
