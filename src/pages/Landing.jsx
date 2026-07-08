@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import useAuth from '../hooks/useAuth'
 import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
  
 const testimonials = [
   { name: 'M.', age: '24', text: 'I stopped spiraling over one-word replies. Vela helped me see what I was actually reacting to.' },
@@ -110,6 +110,7 @@ const Landing = () => {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [wordIndex, setWordIndex] = useState(0)
+  const prefersReducedMotion = useReducedMotion()
  
   useEffect(() => {
     if (user) navigate('/chat')
@@ -145,12 +146,12 @@ const Landing = () => {
       `}</style>
  
       <motion.div
-        animate={{ x: [0, 60, 0], y: [0, -40, 0], scale: [1, 1.1, 1] }}
+        animate={prefersReducedMotion ? {} : { x: [0, 60, 0], y: [0, -40, 0], scale: [1, 1.1, 1] }}
         transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut' }}
         style={{ position: 'absolute', top: '-100px', left: '-100px', width: '500px', height: '500px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(168,85,247,0.18), transparent 70%)', filter: 'blur(40px)', pointerEvents: 'none' }}
       />
       <motion.div
-        animate={{ x: [0, -50, 0], y: [0, 50, 0], scale: [1, 1.05, 1] }}
+        animate={prefersReducedMotion ? {} : { x: [0, -50, 0], y: [0, 50, 0], scale: [1, 1.05, 1] }}
         transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
         style={{ position: 'absolute', top: '200px', right: '-150px', width: '600px', height: '600px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(236,72,153,0.14), transparent 70%)', filter: 'blur(40px)', pointerEvents: 'none' }}
       />
@@ -214,7 +215,7 @@ const Landing = () => {
  
         <motion.div variants={fadeUp} style={{ perspective: '1400px' }}>
           <motion.div
-            animate={{ y: [0, -10, 0] }}
+            animate={prefersReducedMotion ? {} : { y: [0, -10, 0] }}
             transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
             whileHover={{ rotateX: 4, rotateY: -3, scale: 1.015 }}
             style={{
