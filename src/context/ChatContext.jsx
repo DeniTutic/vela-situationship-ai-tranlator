@@ -45,71 +45,54 @@ export const ChatProvider = ({ children }) => {
   }
 
   const sendMessage = async (chatId, content, inputType = 'text') => {
-    try {
-      const userMsg = { role: 'user', content, _id: `temp-${Date.now()}`, inputType }
-      setMessages(prev => [...prev, userMsg])
-      setStreamingMessage('')
+        if (contentType?.includes('application/json')) {
+          const data = await response.json()
+          const chatRes = await api.get(`/chat/${chatId}`)
+          setMessages(chatRes.data.messages)
+          await fetchChats()
+          return data.message?.content ?? null
+        }
 
-      const response = await fetch(`/api/chat/${chatId}/message`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ content, inputType })
-      })
+        const reader = response.body.getReader()
+        const decoder = new TextDecoder()
+        let accumulated = ''
+        let buffer = ''
+        let finalText = null
 
-      if (response.status === 429) {
-        setMessages(prev => prev.filter(m => !m._id?.toString().startsWith('temp-')))
-        const data = await response.json()
-        setLimitReached(true)
-        setMsUntilReset(data.msUntilReset || null)
-        return
-      }
+        while (true) {
+          const { done, value } = await reader.read()
+          if (done) break
 
-      const contentType = response.headers.get('content-type')
+          buffer += decoder.decode(value, { stream: true })
+          const lines = buffer.split('\n')
+          buffer = lines.pop()
 
-      if (contentType?.includes('application/json')) {
-        const data = await response.json()
-        const chatRes = await api.get(`/chat/${chatId}`)
-        setMessages(chatRes.data.messages)
-        await fetchChats()
-        return data.message
-      }
-
-      const reader = response.body.getReader()
-      const decoder = new TextDecoder()
-      let accumulated = ''
-      let buffer = ''
-
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-
-        buffer += decoder.decode(value, { stream: true })
-        const lines = buffer.split('\n')
-        buffer = lines.pop()
-
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(line.slice(6))
-              if (data.delta) {
-                accumulated += data.delta
-                setStreamingMessage(accumulated)
-              }
-              if (data.done) {
-                setStreamingMessage('')
-                const chatRes = await api.get(`/chat/${chatId}`)
-                setMessages(chatRes.data.messages)
-                await fetchChats()
-              }
-            } catch {}
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(line.slice(6))
+                if (data.delta) {
+                  accumulated += data.delta
+                  setStreamingMessage(accumulated)
+                }
+                if (data.done) {
+                  setStreamingMessage('')
+                  const chatRes = await api.get(`/chat/${chatId}`)
+                  setMessages(chatRes.data.messages)
+                  await fetchChats()
+                  const lastMsg = chatRes.data.messages[chatRes.data.messages.length - 1]
+                  finalText = lastMsg?.role === 'assistant' ? lastMsg.content : accumulated
+                }
+              } catch {}
+            }
           }
         }
+
+        return finalText
+      } catch (err) {
+        throw err
       }
-    } catch (err) {
-      throw err
     }
-  }
 
   const deleteChat = async (chatId) => {
     await api.delete(`/chat/${chatId}`)
