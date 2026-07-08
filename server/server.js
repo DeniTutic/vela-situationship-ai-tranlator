@@ -9,7 +9,7 @@ dotenv.config()
 const authRoutes = require('./routes/authRoutes')
 const chatRoutes = require('./routes/chatRoutes')
 const stripeRoutes = require('./routes/stripeRoutes')
-
+const voiceRoutes = require('./routes/voiceRoutes')
 const app = express()
 
 // Stripe webhook needs raw body — must be before express.json()
@@ -28,7 +28,7 @@ app.use(cors({
 app.use('/api/auth', authRoutes)
 app.use('/api/chat', chatRoutes)
 app.use('/api/stripe', stripeRoutes)
-
+app.use('/api/voice', voiceRoutes)
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'Vela API is running' })
