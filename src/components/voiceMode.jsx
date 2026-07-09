@@ -5,17 +5,33 @@ import api from '../utils/api'
  
 // states: 'idle' | 'listening' | 'thinking' | 'speaking'
  
-const VoiceMode = ({ onUserSpeech, onSessionEnd }) => {
+const FEMALE_HINTS = ['female', 'zira', 'samantha', 'victoria', 'karen', 'susan', 'moira', 'tessa', 'fiona', 'aria', 'jenny']
+const MALE_HINTS = ['male', 'david', 'alex', 'daniel', 'fred', 'george', 'mark', 'guy', 'ryan']
+ 
+const getVoiceByGender = (voices, gender) => {
+  if (!voices.length) return null
+  const hints = gender === 'male' ? MALE_HINTS : FEMALE_HINTS
+  const englishVoices = voices.filter(v => v.lang.startsWith('en'))
+  const match = englishVoices.find(v => hints.some(h => v.name.toLowerCase().includes(h)))
+  return match || englishVoices[0] || voices[0]
+}
+ 
+const VoiceMode = ({ onUserSpeech, onSessionEnd, defaultGender = 'female', emotionProfile = { rate: 1, pitch: 1.05 } }) => {
   const [state, setState] = useState('idle')
   const [remaining, setRemaining] = useState(null)
+  const [gender, setGender] = useState(defaultGender)
+  const [voices, setVoices] = useState([])
   const recognitionRef = useRef(null)
-  const activeRef = useRef(false) // tracks whether the conversation loop should continue
+  const activeRef = useRef(false)
  
   const SpeechRecognitionAPI = typeof window !== 'undefined'
     ? (window.SpeechRecognition || window.webkitSpeechRecognition)
     : null
  
   useEffect(() => {
+    const loadVoices = () => setVoices(window.speechSynthesis.getVoices())
+    loadVoices()
+    window.speechSynthesis.onvoiceschanged = loadVoices
     return () => {
       activeRef.current = false
       recognitionRef.current?.abort()
@@ -50,16 +66,13 @@ const VoiceMode = ({ onUserSpeech, onSessionEnd }) => {
  
     recognition.onerror = (event) => {
       if (event.error === 'no-speech' && activeRef.current) {
-        recognitionRef.current?.start() // keep listening quietly
+        recognitionRef.current?.start()
         return
       }
-      if (activeRef.current) {
-        setState('listening')
-      }
+      if (activeRef.current) setState('listening')
     }
  
     recognition.onend = () => {
-      // only auto-restart if we're still meant to be listening (not mid-thinking/speaking, not stopped)
       if (activeRef.current && state !== 'thinking' && state !== 'speaking') {
         recognition.start()
       }
@@ -74,14 +87,12 @@ const VoiceMode = ({ onUserSpeech, onSessionEnd }) => {
     setState('speaking')
     window.speechSynthesis.cancel()
     const utterance = new SpeechSynthesisUtterance(text)
-    utterance.rate = 1
-    utterance.pitch = 1
-    utterance.onend = () => {
-      if (activeRef.current) startListening()
-    }
-    utterance.onerror = () => {
-      if (activeRef.current) startListening()
-    }
+    const voice = getVoiceByGender(voices, gender)
+    if (voice) utterance.voice = voice
+    utterance.rate = emotionProfile.rate
+    utterance.pitch = emotionProfile.pitch
+    utterance.onend = () => { if (activeRef.current) startListening() }
+    utterance.onerror = () => { if (activeRef.current) startListening() }
     window.speechSynthesis.speak(utterance)
   }
  
@@ -115,6 +126,27 @@ const VoiceMode = ({ onUserSpeech, onSessionEnd }) => {
  
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+      {state === 'idle' && (
+        <div style={{ display: 'flex', gap: '6px', background: 'rgba(255,255,255,0.04)', borderRadius: '999px', padding: '4px' }}>
+          <button
+            onClick={() => setGender('female')}
+            style={{
+              padding: '5px 14px', borderRadius: '999px', border: 'none', fontSize: '12px', fontWeight: '600', cursor: 'pointer',
+              backgroundColor: gender === 'female' ? '#9333ea' : 'transparent',
+              color: gender === 'female' ? 'white' : '#9ca3af'
+            }}
+          >♀ Female</button>
+          <button
+            onClick={() => setGender('male')}
+            style={{
+              padding: '5px 14px', borderRadius: '999px', border: 'none', fontSize: '12px', fontWeight: '600', cursor: 'pointer',
+              backgroundColor: gender === 'male' ? '#9333ea' : 'transparent',
+              color: gender === 'male' ? 'white' : '#9ca3af'
+            }}
+          >♂ Male</button>
+        </div>
+      )}
+ 
       <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
         <motion.button
           onClick={state === 'idle' ? handleStart : undefined}

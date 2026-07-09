@@ -2,26 +2,27 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import useAuth from '../hooks/useAuth'
 import useChat from '../hooks/useChat'
-
+ 
 const MODES = [
   { key: 'easy', label: '😊 Easy', desc: 'They are cooperative and understanding' },
   { key: 'realistic', label: '😐 Realistic', desc: 'They react how they probably would' },
   { key: 'hard', label: '😤 Hard', desc: 'They are defensive and dismissive' },
   { key: 'worst', label: '💀 Worst Case', desc: 'Prepares you for absolutely anything' },
 ]
-
+ 
 const Practice = () => {
   const navigate = useNavigate()
   const { user } = useAuth()
   const { createChat, practiceLimit, setPracticeLimit } = useChat()
   const [target, setTarget] = useState('')
   const [mode, setMode] = useState('realistic')
+  const [voiceGender, setVoiceGender] = useState('female')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-
+ 
   const isPro = ['plus', 'pro'].includes(user?.subscriptionStatus)
   const freePracticeLimit = 2
-
+ 
   const handleStart = async () => {
     if (!target.trim()) return
     setLoading(true)
@@ -33,7 +34,7 @@ const Practice = () => {
         target,
         mode
       )
-      navigate(`/chat/${chat._id}`)
+      navigate(`/chat/${chat._id}`, { state: { voiceGender } })
     } catch (err) {
       if (err.response?.status === 429) {
         setError('practice_limit')
@@ -42,7 +43,7 @@ const Practice = () => {
       setLoading(false)
     }
   }
-
+ 
   if (error === 'practice_limit') {
     return (
       <div style={{ display: 'flex', height: '100vh', backgroundColor: '#0f0f0f', color: 'white', alignItems: 'center', justifyContent: 'center', padding: '40px' }}>
@@ -70,7 +71,7 @@ const Practice = () => {
       </div>
     )
   }
-
+ 
   return (
     <div style={{ display: 'flex', height: '100vh', backgroundColor: '#0f0f0f', color: 'white' }}>
       <div style={{ width: '256px', minWidth: '256px', height: '100vh', backgroundColor: '#111111', borderRight: '1px solid rgba(255,255,255,0.05)', padding: '20px 16px' }}>
@@ -80,7 +81,7 @@ const Practice = () => {
         >
           ← Back to chats
         </button>
-
+ 
         {!isPro && (
           <div style={{ marginTop: '24px', padding: '12px', backgroundColor: 'rgba(168,85,247,0.08)', border: '1px solid rgba(168,85,247,0.15)', borderRadius: '10px' }}>
             <p style={{ fontSize: '12px', color: '#a855f7', fontWeight: '600', marginBottom: '4px' }}>Free Plan</p>
@@ -96,14 +97,14 @@ const Practice = () => {
           </div>
         )}
       </div>
-
+ 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px' }}>
         <div style={{ width: '100%', maxWidth: '520px', display: 'flex', flexDirection: 'column', gap: '28px' }}>
           <div>
             <h1 style={{ fontSize: '28px', fontWeight: '700', marginBottom: '8px' }}>🎭 Practice Mode</h1>
             <p style={{ color: '#6b7280', fontSize: '15px' }}>Practice a real conversation before you have it. AI becomes the person, then gives you a full debrief.</p>
           </div>
-
+ 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <label style={{ fontSize: '13px', color: '#9ca3af', fontWeight: '500' }}>Who do you need to talk to?</label>
             <input
@@ -113,7 +114,31 @@ const Practice = () => {
               style={{ backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px', padding: '12px 16px', color: 'white', fontSize: '14px', outline: 'none', fontFamily: 'inherit' }}
             />
           </div>
-
+ 
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <label style={{ fontSize: '13px', color: '#9ca3af', fontWeight: '500' }}>Their voice</label>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                onClick={() => setVoiceGender('female')}
+                style={{
+                  flex: 1, padding: '10px', borderRadius: '10px', cursor: 'pointer', fontSize: '13px', fontWeight: '600',
+                  border: voiceGender === 'female' ? '1px solid #9333ea' : '1px solid rgba(255,255,255,0.08)',
+                  backgroundColor: voiceGender === 'female' ? 'rgba(147,51,234,0.15)' : 'rgba(255,255,255,0.03)',
+                  color: voiceGender === 'female' ? 'white' : '#9ca3af'
+                }}
+              >♀ Female</button>
+              <button
+                onClick={() => setVoiceGender('male')}
+                style={{
+                  flex: 1, padding: '10px', borderRadius: '10px', cursor: 'pointer', fontSize: '13px', fontWeight: '600',
+                  border: voiceGender === 'male' ? '1px solid #9333ea' : '1px solid rgba(255,255,255,0.08)',
+                  backgroundColor: voiceGender === 'male' ? 'rgba(147,51,234,0.15)' : 'rgba(255,255,255,0.03)',
+                  color: voiceGender === 'male' ? 'white' : '#9ca3af'
+                }}
+              >♂ Male</button>
+            </div>
+          </div>
+ 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <label style={{ fontSize: '13px', color: '#9ca3af', fontWeight: '500' }}>Difficulty</label>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -141,7 +166,7 @@ const Practice = () => {
               })}
             </div>
           </div>
-
+ 
           <button
             onClick={handleStart}
             disabled={!target.trim() || loading}
@@ -158,5 +183,5 @@ const Practice = () => {
     </div>
   )
 }
-
+ 
 export default Practice
