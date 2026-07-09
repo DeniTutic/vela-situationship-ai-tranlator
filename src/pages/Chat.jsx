@@ -8,6 +8,7 @@ import useChat from '../hooks/useChat'
 import api from '../utils/api'
 import ReactMarkdown from 'react-markdown'
 import VoiceMode from '../components/VoiceMode'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 
 const WELCOME_MESSAGE = {
   role: 'assistant',
@@ -59,6 +60,14 @@ const LimitBanner = ({ msUntilReset, onUpgrade }) => {
   )
 }
 
+const EMOTION_PROFILES = {
+  easy: { rate: 1, pitch: 1.1 },
+  realistic: { rate: 1, pitch: 1 },
+  hard: { rate: 1.15, pitch: 0.88 },
+  worst: { rate: 1.3, pitch: 0.78 },
+  default: { rate: 1, pitch: 1.05 }
+}
+
 const Chat = () => {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -70,8 +79,10 @@ const Chat = () => {
   const bottomRef = useRef(null)
   const inputRef = useRef(null)
   const [showVoice, setShowVoice] = useState(false)
-
   const isPro = ['plus', 'pro'].includes(user?.subscriptionStatus)
+  const location = useLocation()
+  const voiceGender = location.state?.voiceGender || 'female'
+  const emotionProfile = EMOTION_PROFILES[activeChat?.practiceMode] || EMOTION_PROFILES.default
 
   useEffect(() => {
     if (id) loadChat(id)
@@ -313,6 +324,8 @@ const Chat = () => {
             <VoiceMode
               onUserSpeech={handleVoiceMessage}
               onSessionEnd={() => setShowVoice(false)}
+              defaultGender={voiceGender}
+              emotionProfile={emotionProfile}
             />
           </div>
         )}
