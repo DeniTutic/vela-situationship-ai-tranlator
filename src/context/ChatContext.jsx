@@ -1,8 +1,8 @@
 import { createContext, useState } from 'react'
 import api from '../utils/api'
-
+ 
 export const ChatContext = createContext()
-
+ 
 export const ChatProvider = ({ children }) => {
   const [chats, setChats] = useState([])
   const [activeChat, setActiveChat] = useState(null)
@@ -12,12 +12,12 @@ export const ChatProvider = ({ children }) => {
   const [msUntilReset, setMsUntilReset] = useState(null)
   const [practiceLimit, setPracticeLimit] = useState(false)
   const [streamingMessage, setStreamingMessage] = useState('')
-
+ 
   const fetchChats = async () => {
     const res = await api.get('/chat')
     setChats(res.data)
   }
-
+ 
   const createChat = async (responseStyle = 'gentle', isPractice = false, practiceTarget = '', practiceMode = 'realistic') => {
     try {
       const res = await api.post('/chat/new', { responseStyle, isPractice, practiceTarget, practiceMode })
@@ -34,7 +34,7 @@ export const ChatProvider = ({ children }) => {
       throw err
     }
   }
-
+ 
   const loadChat = async (chatId) => {
     setLoading(true)
     const res = await api.get(`/chat/${chatId}`)
@@ -43,57 +43,79 @@ export const ChatProvider = ({ children }) => {
     setLimitReached(false)
     setLoading(false)
   }
-
+ 
   const sendMessage = async (chatId, content, inputType = 'text') => {
-        if (contentType?.includes('application/json')) {
-          const data = await response.json()
-          const chatRes = await api.get(`/chat/${chatId}`)
-          setMessages(chatRes.data.messages)
-          await fetchChats()
-          return data.message?.content ?? null
-        }
-
-        const reader = response.body.getReader()
-        const decoder = new TextDecoder()
-        let accumulated = ''
-        let buffer = ''
-        let finalText = null
-
-        while (true) {
-          const { done, value } = await reader.read()
-          if (done) break
-
-          buffer += decoder.decode(value, { stream: true })
-          const lines = buffer.split('\n')
-          buffer = lines.pop()
-
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              try {
-                const data = JSON.parse(line.slice(6))
-                if (data.delta) {
-                  accumulated += data.delta
-                  setStreamingMessage(accumulated)
-                }
-                if (data.done) {
-                  setStreamingMessage('')
-                  const chatRes = await api.get(`/chat/${chatId}`)
-                  setMessages(chatRes.data.messages)
-                  await fetchChats()
-                  const lastMsg = chatRes.data.messages[chatRes.data.messages.length - 1]
-                  finalText = lastMsg?.role === 'assistant' ? lastMsg.content : accumulated
-                }
-              } catch {}
-            }
+    try {
+      const userMsg = { role: 'user', content, _id: `temp-${Date.now()}`, inputType }
+      setMessages(prev => [...prev, userMsg])
+      setStreamingMessage('')
+ 
+      const response = await fetch(`/api/chat/${chatId}/message`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ content, inputType })
+      })
+ 
+      if (response.status === 429) {
+        setMessages(prev => prev.filter(m => !m._id?.toString().startsWith('temp-')))
+        const data = await response.json()
+        setLimitReached(true)
+        setMsUntilReset(data.msUntilReset || null)
+        return null
+      }
+ 
+      const contentType = response.headers.get('content-type')
+ 
+      if (contentType?.includes('application/json')) {
+        const data = await response.json()
+        const chatRes = await api.get(`/chat/${chatId}`)
+        setMessages(chatRes.data.messages)
+        await fetchChats()
+        return data.message?.content ?? null
+      }
+ 
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      let accumulated = ''
+      let buffer = ''
+      let finalText = null
+ 
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+ 
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n')
+        buffer = lines.pop()
+ 
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6))
+              if (data.delta) {
+                accumulated += data.delta
+                setStreamingMessage(accumulated)
+              }
+              if (data.done) {
+                setStreamingMessage('')
+                const chatRes = await api.get(`/chat/${chatId}`)
+                setMessages(chatRes.data.messages)
+                await fetchChats()
+                const lastMsg = chatRes.data.messages[chatRes.data.messages.length - 1]
+                finalText = lastMsg?.role === 'assistant' ? lastMsg.content : accumulated
+              }
+            } catch {}
           }
         }
-
-        return finalText
-      } catch (err) {
-        throw err
       }
+ 
+      return finalText
+    } catch (err) {
+      throw err
     }
-
+  }
+ 
   const deleteChat = async (chatId) => {
     await api.delete(`/chat/${chatId}`)
     setChats(prev => prev.filter(c => c._id !== chatId))
@@ -102,7 +124,7 @@ export const ChatProvider = ({ children }) => {
       setMessages([])
     }
   }
-
+ 
   return (
     <ChatContext.Provider value={{
       chats, activeChat, messages, loading, limitReached, msUntilReset,
@@ -113,3 +135,4 @@ export const ChatProvider = ({ children }) => {
     </ChatContext.Provider>
   )
 }
+ 
