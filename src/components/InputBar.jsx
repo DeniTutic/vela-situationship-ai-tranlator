@@ -1,23 +1,23 @@
 import { useState, forwardRef, useRef, useEffect } from 'react'
-import { Send, ImagePlus, X, Mic, MicOff } from 'lucide-react'
-
-const InputBar = forwardRef(({ onSend, onImageUpload, disabled }, ref) => {
+import { Send, ImagePlus, X, Mic, MicOff, AudioLines, Lock } from 'lucide-react'
+ 
+const InputBar = forwardRef(({ onSend, onImageUpload, disabled, onOpenVoiceMode, voiceUnlocked = true }, ref) => {
   const [text, setText] = useState('')
   const [imagePreview, setImagePreview] = useState(null)
   const [imageFile, setImageFile] = useState(null)
   const [listening, setListening] = useState(false)
   const fileRef = useRef(null)
   const recognitionRef = useRef(null)
-
+ 
   useEffect(() => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) return
-
+ 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
     const recognition = new SpeechRecognition()
     recognition.continuous = true
     recognition.interimResults = true
     recognition.lang = 'en-US'
-
+ 
     recognition.onresult = (event) => {
       let transcript = ''
       for (let i = 0; i < event.results.length; i++) {
@@ -25,18 +25,18 @@ const InputBar = forwardRef(({ onSend, onImageUpload, disabled }, ref) => {
       }
       setText(transcript)
     }
-
+ 
     recognition.onend = () => {
       setListening(false)
     }
-
+ 
     recognition.onerror = () => {
       setListening(false)
     }
-
+ 
     recognitionRef.current = recognition
   }, [])
-
+ 
   const toggleListening = () => {
     if (!recognitionRef.current) {
       alert('Voice input is not supported in this browser. Try Chrome.')
@@ -51,7 +51,7 @@ const InputBar = forwardRef(({ onSend, onImageUpload, disabled }, ref) => {
       setListening(true)
     }
   }
-
+ 
   const handleSend = () => {
     if ((!text.trim() && !imageFile) || disabled) return
     if (listening) {
@@ -68,14 +68,14 @@ const InputBar = forwardRef(({ onSend, onImageUpload, disabled }, ref) => {
       setText('')
     }
   }
-
+ 
   const handleKey = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
       handleSend()
     }
   }
-
+ 
   const handleFileChange = (e) => {
     const file = e.target.files[0]
     if (file) {
@@ -86,14 +86,14 @@ const InputBar = forwardRef(({ onSend, onImageUpload, disabled }, ref) => {
       e.target.value = ''
     }
   }
-
+ 
   const removeImage = () => {
     setImageFile(null)
     setImagePreview(null)
   }
-
+ 
   const canSend = (text.trim() || imageFile) && !disabled
-
+ 
   return (
     <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '12px 24px' }}>
     <div style={{ maxWidth: '760px', margin: '0 auto' }}> 
@@ -113,7 +113,7 @@ const InputBar = forwardRef(({ onSend, onImageUpload, disabled }, ref) => {
           </button>
         </div>
       )}
-
+ 
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px', backgroundColor: listening ? 'rgba(168,85,247,0.08)' : 'rgba(255,255,255,0.05)', border: `1px solid ${listening ? 'rgba(168,85,247,0.4)' : 'rgba(255,255,255,0.08)'}`, borderRadius: '16px', padding: '12px 16px', transition: 'all 0.2s' }}>
         <textarea
           ref={ref}
@@ -133,11 +133,13 @@ const InputBar = forwardRef(({ onSend, onImageUpload, disabled }, ref) => {
             fontFamily: 'inherit', maxHeight: '160px', overflow: 'auto'
           }}
         />
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
           <span style={{ fontSize: '11px', color: text.length > 800 ? '#f87171' : '#4b5563' }}>
             {text.length}/1000
           </span>
           <input ref={fileRef} type="file" accept="image/*" onChange={handleFileChange} style={{ display: 'none' }} />
+ 
+          {/* Upload screenshot */}
           <button
             onClick={() => fileRef.current?.click()}
             disabled={disabled}
@@ -151,10 +153,12 @@ const InputBar = forwardRef(({ onSend, onImageUpload, disabled }, ref) => {
           >
             <ImagePlus size={14} color={imageFile ? '#a855f7' : '#6b7280'} />
           </button>
+ 
+          {/* Quick dictation — fills the text box, you still hit send */}
           <button
             onClick={toggleListening}
             disabled={disabled}
-            title={listening ? 'Stop listening' : 'Voice input'}
+            title={listening ? 'Stop dictating' : 'Dictate a message'}
             style={{
               width: '32px', height: '32px',
               backgroundColor: listening ? 'rgba(236,72,153,0.2)' : 'rgba(255,255,255,0.05)',
@@ -165,6 +169,30 @@ const InputBar = forwardRef(({ onSend, onImageUpload, disabled }, ref) => {
           >
             {listening ? <MicOff size={14} color="#ec4899" /> : <Mic size={14} color="#6b7280" />}
           </button>
+ 
+          {/* Live voice conversation with Vela — distinct icon from dictation */}
+          {onOpenVoiceMode && (
+            <button
+              onClick={onOpenVoiceMode}
+              disabled={disabled}
+              title={voiceUnlocked ? 'Talk to Vela live' : 'Voice conversations are a Vela+ feature'}
+              style={{
+                width: '32px', height: '32px', position: 'relative',
+                backgroundColor: 'rgba(168,85,247,0.12)',
+                border: '1px solid rgba(168,85,247,0.25)', borderRadius: '10px', display: 'flex', alignItems: 'center',
+                justifyContent: 'center', cursor: disabled ? 'default' : 'pointer', flexShrink: 0
+              }}
+            >
+              <AudioLines size={14} color="#c084fc" />
+              {!voiceUnlocked && (
+                <span style={{ position: 'absolute', top: '-4px', right: '-4px', width: '13px', height: '13px', borderRadius: '50%', backgroundColor: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Lock size={8} color="#6b7280" />
+                </span>
+              )}
+            </button>
+          )}
+ 
+          {/* Send */}
           <button
             onClick={handleSend}
             disabled={!canSend}
@@ -181,13 +209,13 @@ const InputBar = forwardRef(({ onSend, onImageUpload, disabled }, ref) => {
         </div>
       </div>
       <p style={{ fontSize: '11px', color: '#374151', textAlign: 'center', marginTop: '8px' }}>
-        Enter to send · Shift+Enter for new line
+        Enter to send · Shift+Enter for new line · 🎙️ dictates, 🔊 talks live
       </p>
     </div>
     </div>
   )
 })
-
+ 
 InputBar.displayName = 'InputBar'
-
+ 
 export default InputBar
