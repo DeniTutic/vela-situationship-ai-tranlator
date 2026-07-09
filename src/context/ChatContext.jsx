@@ -11,6 +11,8 @@ export const ChatProvider = ({ children }) => {
   const [limitReached, setLimitReached] = useState(false)
   const [msUntilReset, setMsUntilReset] = useState(null)
   const [practiceLimit, setPracticeLimit] = useState(false)
+  const [conversationCapReached, setConversationCapReached] = useState(false)
+  const [messageCapReached, setMessageCapReached] = useState(false)
   const [streamingMessage, setStreamingMessage] = useState('')
  
   const fetchChats = async () => {
@@ -31,6 +33,10 @@ export const ChatProvider = ({ children }) => {
         setPracticeLimit(true)
         throw err
       }
+      if (err.response?.status === 403 && err.response?.data?.conversationCapReached) {
+        setConversationCapReached(true)
+        throw err
+      }
       throw err
     }
   }
@@ -41,6 +47,7 @@ export const ChatProvider = ({ children }) => {
     setActiveChat(res.data.chat)
     setMessages(res.data.messages)
     setLimitReached(false)
+    setMessageCapReached(false)
     setLoading(false)
   }
  
@@ -62,6 +69,15 @@ export const ChatProvider = ({ children }) => {
         const data = await response.json()
         setLimitReached(true)
         setMsUntilReset(data.msUntilReset || null)
+        return null
+      }
+ 
+      if (response.status === 403) {
+        setMessages(prev => prev.filter(m => !m._id?.toString().startsWith('temp-')))
+        const data = await response.json()
+        if (data.messageCapReached) {
+          setMessageCapReached(true)
+        }
         return null
       }
  
@@ -128,7 +144,8 @@ export const ChatProvider = ({ children }) => {
   return (
     <ChatContext.Provider value={{
       chats, activeChat, messages, loading, limitReached, msUntilReset,
-      practiceLimit, setPracticeLimit, streamingMessage,
+      practiceLimit, setPracticeLimit, conversationCapReached, setConversationCapReached,
+      messageCapReached, setMessageCapReached, streamingMessage,
       fetchChats, createChat, loadChat, sendMessage, deleteChat, setActiveChat, setMessages, setStreamingMessage
     }}>
       {children}
