@@ -73,8 +73,22 @@ const Practice = () => {
   }
  
   return (
-    <div style={{ display: 'flex', height: '100vh', backgroundColor: '#0f0f0f', color: 'white' }}>
-      <div style={{ width: '256px', minWidth: '256px', height: '100vh', backgroundColor: '#111111', borderRight: '1px solid rgba(255,255,255,0.05)', padding: '20px 16px' }}>
+    <div className="practice-layout" style={{ display: 'flex', height: '100vh', backgroundColor: '#0f0f0f', color: 'white', overflowY: 'auto' }}>
+      <style>{`
+        @media (max-width: 768px) {
+          .practice-layout { flex-direction: column; height: auto; min-height: 100vh; }
+          .practice-sidebar {
+            width: 100% !important; min-width: 0 !important; height: auto !important;
+            border-right: none !important; border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex !important; flex-direction: row !important; align-items: center !important;
+            justify-content: space-between !important; gap: 12px; padding: 14px 16px !important;
+          }
+          .practice-upgrade-card { margin-top: 0 !important; flex-shrink: 0; }
+          .practice-main { padding: 24px 20px !important; }
+        }
+      `}</style>
+ 
+      <div className="practice-sidebar" style={{ width: '256px', minWidth: '256px', height: '100vh', backgroundColor: '#111111', borderRight: '1px solid rgba(255,255,255,0.05)', padding: '20px 16px' }}>
         <button
           onClick={() => navigate('/chat')}
           style={{ background: 'none', border: 'none', color: '#9ca3af', cursor: 'pointer', fontSize: '14px', padding: '8px', borderRadius: '8px' }}
@@ -83,7 +97,7 @@ const Practice = () => {
         </button>
  
         {!isPro && (
-          <div style={{ marginTop: '24px', padding: '12px', backgroundColor: 'rgba(168,85,247,0.08)', border: '1px solid rgba(168,85,247,0.15)', borderRadius: '10px' }}>
+          <div className="practice-upgrade-card" style={{ marginTop: '24px', padding: '12px', backgroundColor: 'rgba(168,85,247,0.08)', border: '1px solid rgba(168,85,247,0.15)', borderRadius: '10px', maxWidth: '260px' }}>
             <p style={{ fontSize: '12px', color: '#a855f7', fontWeight: '600', marginBottom: '4px' }}>Free Plan</p>
             <p style={{ fontSize: '11px', color: '#6b7280', lineHeight: 1.5 }}>
               {freePracticeLimit} practice sessions included. Upgrade for unlimited.
@@ -98,7 +112,7 @@ const Practice = () => {
         )}
       </div>
  
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px' }}>
+      <div className="practice-main" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px' }}>
         <div style={{ width: '100%', maxWidth: '520px', display: 'flex', flexDirection: 'column', gap: '28px' }}>
           <div>
             <h1 style={{ fontSize: '28px', fontWeight: '700', marginBottom: '8px' }}>🎭 Practice Mode</h1>
