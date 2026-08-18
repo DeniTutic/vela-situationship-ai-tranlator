@@ -7,7 +7,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: function () { return !this.googleId; }
   },
-  googleId: { type: String, unique: true, sparse: true, default: null },
+  googleId: { type: String, unique: true, sparse: true },
   authProvider: { type: String, enum: ['local', 'google'], default: 'local' },
   avatar: { type: String, default: '' },
   language: { type: String, enum: ['en', 'bs'], default: 'en' },
