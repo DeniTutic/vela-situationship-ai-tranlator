@@ -100,7 +100,7 @@ const sendMessage = async (req, res) => {
       const history = await Message.find({ chatId: chat._id }).sort({ createdAt: 1 });
       const debriefPrompt = 'You are now stepping out of character. The practice conversation is over. Give the user a detailed debrief of how they handled the conversation with "' + chat.practiceTarget + '". Format your response exactly like this:\n\n## Practice Debrief\n\n**Overall Score: X/10**\n\n### What You Did Well\n- [specific things]\n\n### What Hurt You\n- [specific mistakes]\n\n### What to Remove\n- [bad habits]\n\n### One Thing to Focus On Next Time\n[improvement]\n\n### Final Verdict\n[2-3 sentence summary]';
       const debriefCompletion = await groq.chat.completions.create({
-        model: 'llama-3.3-70b-versatile',
+        model: 'openai/gpt-oss-120b',
         messages: [
           { role: 'system', content: debriefPrompt },
           ...history.map(function(m) { return { role: m.role, content: m.content }; })
@@ -149,7 +149,7 @@ const sendMessage = async (req, res) => {
     res.flushHeaders();
  
     const stream = await groq.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
+      model: 'openai/gpt-oss-120b',
       messages: [{ role: 'system', content: systemPrompt }].concat(messages),
       max_tokens: maxTokens,
       temperature: 0.8,
@@ -173,12 +173,16 @@ const sendMessage = async (req, res) => {
     });
  
     if (history.length === 1 && !chat.isPractice) {
-      const titleCompletion = await groq.chat.completions.create({
-        model: 'llama-3.3-70b-versatile',
-        messages: [{ role: 'user', content: 'Generate a short 4-6 word title for a relationship advice conversation that starts with: "' + content + '". Return only the title, nothing else.' }],
-        max_tokens: 20
-      });
-      await Chat.findByIdAndUpdate(chat._id, { title: titleCompletion.choices[0].message.content.trim() });
+      try {
+        const titleCompletion = await groq.chat.completions.create({
+          model: 'openai/gpt-oss-120b',
+          messages: [{ role: 'user', content: 'Generate a short 4-6 word title for a relationship advice conversation that starts with: "' + content + '". Return only the title, nothing else.' }],
+          max_tokens: 20
+        });
+        await Chat.findByIdAndUpdate(chat._id, { title: titleCompletion.choices[0].message.content.trim() });
+      } catch (titleErr) {
+        console.error('Title generation failed (non-fatal):', titleErr.message);
+      }
     }
  
     await Chat.findByIdAndUpdate(chat._id, { updatedAt: new Date() });
@@ -186,10 +190,14 @@ const sendMessage = async (req, res) => {
     res.end();
  
   } catch (err) {
+    if (res.headersSent) {
+      console.error('Error after headers sent:', err.message);
+      return res.end();
+    }
     res.status(500).json({ message: 'Failed to send message', error: err.message });
   }
 };
- 
+
 const deleteChat = async (req, res) => {
   try {
     const chat = await Chat.findOne({ _id: req.params.id, userId: req.user._id });
