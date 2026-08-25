@@ -1,4 +1,4 @@
-import { useState, forwardRef, useRef, useEffect } from 'react'
+import { useState, forwardRef, useRef, useEffect, useImperativeHandle } from 'react'
 import { Send, ImagePlus, X, Mic, MicOff, AudioLines, Lock } from 'lucide-react'
  
 const InputBar = forwardRef(({ onSend, onImageUpload, disabled, onOpenVoiceMode, voiceUnlocked = true }, ref) => {
@@ -8,6 +8,12 @@ const InputBar = forwardRef(({ onSend, onImageUpload, disabled, onOpenVoiceMode,
   const [listening, setListening] = useState(false)
   const fileRef = useRef(null)
   const recognitionRef = useRef(null)
+  const textareaRef = useRef(null)
+
+  useImperativeHandle(ref, () => ({
+    focus: () => textareaRef.current?.focus(),
+    openFilePicker: () => fileRef.current?.click()
+  }))
  
   useEffect(() => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) return
@@ -115,8 +121,8 @@ const InputBar = forwardRef(({ onSend, onImageUpload, disabled, onOpenVoiceMode,
       )}
  
       <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px', backgroundColor: listening ? 'rgba(168,85,247,0.08)' : 'rgba(255,255,255,0.05)', border: `1px solid ${listening ? 'rgba(168,85,247,0.4)' : 'rgba(255,255,255,0.08)'}`, borderRadius: '16px', padding: '12px 16px', transition: 'all 0.2s' }}>
-        <textarea
-          ref={ref}
+      <textarea
+      ref={textareaRef}
           value={text}
           onChange={e => {
             setText(e.target.value)
