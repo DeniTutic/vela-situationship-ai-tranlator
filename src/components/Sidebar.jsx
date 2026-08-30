@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { motion, AnimatePresence } from 'framer-motion'
 import { MessageSquarePlus, Trash2, LogOut, User, Menu, X } from 'lucide-react'
 import useAuth from '../hooks/useAuth'
 import useChat from '../hooks/useChat'
@@ -194,9 +195,22 @@ const Sidebar = () => {
           </button>
         </div>
       </div>
-          {chatToDelete && (
-      <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-        <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px', padding: '28px', maxWidth: '360px', width: '90%', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px' }}>
+          <AnimatePresence>
+      {chatToDelete && (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.15 }}
+        style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          transition={{ duration: 0.15 }}
+          style={{ backgroundColor: 'var(--bg-card)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px', padding: '28px', maxWidth: '360px', width: '90%', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px' }}
+        >
           <div style={{ fontSize: '36px' }}>🗑️</div>
           <h3 style={{ fontSize: '17px', fontWeight: '700' }}>Delete this chat?</h3>
           <p style={{ color: '#6b7280', fontSize: '13px', lineHeight: 1.5 }}>
@@ -216,9 +230,10 @@ const Sidebar = () => {
               Delete
             </button>
           </div>
-        </div>
-      </div>
-    )}
+        </motion.div>
+      </motion.div>
+      )}
+          </AnimatePresence>
     </>
   )
 }
