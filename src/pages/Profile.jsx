@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import useAuth from '../hooks/useAuth'
 import api from '../utils/api'
 import toast from 'react-hot-toast'
+import useChat from '../hooks/useChat'
 
 const Profile = () => {
   const navigate = useNavigate()
@@ -11,6 +12,9 @@ const Profile = () => {
   const [loading, setLoading] = useState(false)
 
   const isPro = ['plus', 'pro'].includes(user?.subscriptionStatus)
+
+  const { chats } = useChat()
+  const regularChatCount = chats.filter(c => !c.isPractice).length
 
   const handleLogout = async () => {
     await logout()
@@ -64,7 +68,7 @@ const Profile = () => {
                 {user?.subscriptionStatus === 'plus' ? '✨ Vela+' : user?.subscriptionStatus === 'pro' ? '🚀 VelaPro' : '🆓 Free Plan'}
               </p>
               <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
-                {isPro ? 'Unlimited messages' : `${user?.messagesUsedToday || 0}/30 messages used`}
+                {isPro ? 'Unlimited conversations & messages' : `${regularChatCount}/2 conversations · ${user?.practiceSessionsUsed || 0}/2 practice sessions`}
               </p>
             </div>
             {!isPro && (
