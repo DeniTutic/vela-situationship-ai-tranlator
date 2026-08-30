@@ -1,7 +1,18 @@
+import { useState } from 'react'
 import ReactMarkdown from 'react-markdown'
+import { Copy, Check } from 'lucide-react'
+import toast from 'react-hot-toast'
 
 const ChatBubble = ({ message }) => {
   const isUser = message.role === 'user'
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(message.content)
+    setCopied(true)
+    toast.success('Copied to clipboard!', { position: 'top-center' })
+    setTimeout(() => setCopied(false), 1500)
+  }
 
   return (
     <div style={{
@@ -66,30 +77,42 @@ const ChatBubble = ({ message }) => {
           )}
         </div>
       ) : (
-        <div style={{
-          maxWidth: '70%',
-          padding: '10px 14px',
-          borderRadius: '18px 18px 18px 4px',
-          fontSize: '14px',
-          lineHeight: '1.6',
-          backgroundColor: 'rgba(255,255,255,0.06)',
-          color: '#e5e7eb',
-          wordBreak: 'break-word'
-        }}>
-          <ReactMarkdown
-            components={{
-              p: ({ children }) => <p style={{ margin: '0 0 8px 0' }}>{children}</p>,
-              strong: ({ children }) => <strong style={{ color: 'white', fontWeight: '600' }}>{children}</strong>,
-              ul: ({ children }) => <ul style={{ paddingLeft: '20px', margin: '0 0 8px 0' }}>{children}</ul>,
-              ol: ({ children }) => <ol style={{ paddingLeft: '20px', margin: '0 0 8px 0' }}>{children}</ol>,
-              li: ({ children }) => <li style={{ color: '#d1d5db', marginBottom: '4px' }}>{children}</li>,
-              h1: ({ children }) => <h1 style={{ color: 'white', fontSize: '16px', fontWeight: 'bold', margin: '0 0 8px 0' }}>{children}</h1>,
-              h2: ({ children }) => <h2 style={{ color: 'white', fontSize: '14px', fontWeight: 'bold', margin: '0 0 8px 0' }}>{children}</h2>,
-              h3: ({ children }) => <h3 style={{ color: 'white', fontSize: '14px', fontWeight: '600', margin: '0 0 4px 0' }}>{children}</h3>,
+        <div style={{ display: 'flex', flexDirection: 'column', maxWidth: '70%', gap: '4px' }}>
+          <div style={{
+            padding: '10px 14px',
+            borderRadius: '18px 18px 18px 4px',
+            fontSize: '14px',
+            lineHeight: '1.6',
+            backgroundColor: 'rgba(255,255,255,0.06)',
+            color: '#e5e7eb',
+            wordBreak: 'break-word'
+          }}>
+            <ReactMarkdown
+              components={{
+                p: ({ children }) => <p style={{ margin: '0 0 8px 0' }}>{children}</p>,
+                strong: ({ children }) => <strong style={{ color: 'white', fontWeight: '600' }}>{children}</strong>,
+                ul: ({ children }) => <ul style={{ paddingLeft: '20px', margin: '0 0 8px 0' }}>{children}</ul>,
+                ol: ({ children }) => <ol style={{ paddingLeft: '20px', margin: '0 0 8px 0' }}>{children}</ol>,
+                li: ({ children }) => <li style={{ color: '#d1d5db', marginBottom: '4px' }}>{children}</li>,
+                h1: ({ children }) => <h1 style={{ color: 'white', fontSize: '16px', fontWeight: 'bold', margin: '0 0 8px 0' }}>{children}</h1>,
+                h2: ({ children }) => <h2 style={{ color: 'white', fontSize: '14px', fontWeight: 'bold', margin: '0 0 8px 0' }}>{children}</h2>,
+                h3: ({ children }) => <h3 style={{ color: 'white', fontSize: '14px', fontWeight: '600', margin: '0 0 4px 0' }}>{children}</h3>,
+              }}
+            >
+              {message.content}
+            </ReactMarkdown>
+          </div>
+          <button
+            onClick={handleCopy}
+            style={{
+              alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: '4px',
+              background: 'none', border: 'none', cursor: 'pointer',
+              padding: '2px 6px', color: '#6b7280', fontSize: '11px'
             }}
           >
-            {message.content}
-          </ReactMarkdown>
+            {copied ? <Check size={11} color="#4ade80" /> : <Copy size={11} />}
+            {copied ? 'Copied' : 'Copy'}
+          </button>
         </div>
       )}
     </div>
