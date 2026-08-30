@@ -1,5 +1,6 @@
 import { useState, forwardRef, useRef, useEffect, useImperativeHandle } from 'react'
 import { Send, ImagePlus, X, Mic, MicOff, AudioLines, Lock } from 'lucide-react'
+import toast from 'react-hot-toast'
 
 const HINT_SEEN_KEY = 'vela_input_hint_seen'
 
@@ -61,7 +62,7 @@ const InputBar = forwardRef(({ onSend, onImageUpload, disabled, onOpenVoiceMode,
  
   const toggleListening = () => {
     if (!recognitionRef.current) {
-      alert('Voice input is not supported in this browser. Try Chrome.')
+      toast.error('Voice input is not supported in this browser — try Chrome')
       return
     }
     if (listening) {
