@@ -132,7 +132,7 @@ const Pricing = () => {
       <div style={{ textAlign: 'center', marginBottom: '48px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '16px' }}>
           <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg, #a855f7, #ec4899)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px' }}>V</div>
-          <span style={{ fontWeight: '700', fontSize: '18px' }}>Vela</span>
+          <span style={{ fontWeight: '700', fontSize: '18px', fontFamily: "'Bricolage Grotesque', sans-serif" }}>Vela</span>
         </div>
         <h1 style={{ fontSize: '40px', fontWeight: '800', marginBottom: '12px' }}>
           Get the clarity you deserve

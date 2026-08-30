@@ -114,7 +114,7 @@ const Sidebar = () => {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'linear-gradient(135deg, #a855f7, #ec4899)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 'bold', color: 'white' }}>V</div>
-            <span style={{ fontWeight: '600', color: 'white' }}>Vela</span>
+            <span style={{ fontWeight: '600', color: 'white', fontFamily: "'Bricolage Grotesque', sans-serif" }}>Vela</span>
           </div>
           {isMobile && (
             <button
