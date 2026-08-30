@@ -15,6 +15,16 @@
   h1, h2, h3 {
     font-family: 'Bricolage Grotesque', sans-serif;
   }
+
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  a:focus-visible,
+  [role="button"]:focus-visible {
+    outline: 2px solid #a855f7;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
 }
 
 @keyframes blink {
