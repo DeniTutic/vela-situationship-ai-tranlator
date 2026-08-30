@@ -8,6 +8,7 @@ import VoiceMode from '../components/VoiceMode'
 import useChat from '../hooks/useChat'
 import api from '../utils/api'
 import ReactMarkdown from 'react-markdown'
+import { ChevronDown } from 'lucide-react'
 
 const WELCOME_MESSAGE = {
 role: 'assistant',
@@ -102,6 +103,14 @@ const [debriefing, setDebriefing] = useState(false)
 const [showDebriefUpgrade, setShowDebriefUpgrade] = useState(false)
 const [showVoice, setShowVoice] = useState(false)
 const [creatingChat, setCreatingChat] = useState(false)
+const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth < 640)
+const [toneMenuOpen, setToneMenuOpen] = useState(false)
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 640)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 const bottomRef = useRef(null)
 const inputRef = useRef(null)
 
@@ -286,27 +295,82 @@ return (
               {debriefing ? 'Analyzing...' : '🏁 End & Get Debrief'}
             </button>
           )}
-          {!activeChat?.isPractice && activeChat && allModes.map(style => {
-            const isLocked = lockedModes.includes(style) && !isPro
-            const isActive = activeChat.responseStyle === style
-            return (
-              <button
-                key={style}
-                onClick={() => isLocked ? navigate('/pricing') : handleStyleChange(style)}
-                style={{
-                  padding: '4px 10px', borderRadius: '999px', fontSize: '11px',
-                  fontWeight: '500', textTransform: 'capitalize', cursor: 'pointer',
-                  border: isLocked ? '1px solid rgba(255,255,255,0.08)' : 'none',
-                  backgroundColor: isActive ? '#9333ea' : 'rgba(255,255,255,0.05)',
-                  color: isActive ? 'white' : isLocked ? '#4b5563' : '#9ca3af',
-                  display: 'flex', alignItems: 'center', gap: '4px'
-                }}
-              >
-                {isLocked && <span style={{ fontSize: '9px' }}>🔒</span>}
-                {style}
-              </button>
-            )
-          })}
+          {!activeChat?.isPractice && activeChat && (
+  isMobile ? (
+    <div style={{ position: 'relative' }}>
+      <button
+        onClick={() => setToneMenuOpen(o => !o)}
+        style={{
+          padding: '4px 10px', borderRadius: '999px', fontSize: '11px', fontWeight: '500',
+          border: 'none', backgroundColor: '#9333ea', color: 'white',
+          display: 'flex', alignItems: 'center', gap: '4px', textTransform: 'capitalize', cursor: 'pointer'
+        }}
+      >
+        Tone: {activeChat.responseStyle} <ChevronDown size={12} />
+      </button>
+
+      {toneMenuOpen && (
+        <>
+          <div onClick={() => setToneMenuOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 20 }} />
+          <div style={{
+            position: 'absolute', top: '32px', right: 0, zIndex: 21,
+            backgroundColor: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: '12px', padding: '6px', minWidth: '140px',
+            display: 'flex', flexDirection: 'column', gap: '2px',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.4)'
+          }}>
+            {allModes.map(style => {
+              const isLocked = lockedModes.includes(style) && !isPro
+              const isActive = activeChat.responseStyle === style
+              return (
+                <button
+                  key={style}
+                  onClick={() => {
+                    setToneMenuOpen(false)
+                    isLocked ? navigate('/pricing') : handleStyleChange(style)
+                  }}
+                  style={{
+                    padding: '8px 10px', borderRadius: '8px', fontSize: '13px',
+                    fontWeight: '500', textTransform: 'capitalize', cursor: 'pointer',
+                    border: 'none', textAlign: 'left',
+                    backgroundColor: isActive ? 'rgba(147,51,234,0.2)' : 'transparent',
+                    color: isActive ? 'white' : isLocked ? '#4b5563' : '#d1d5db',
+                    display: 'flex', alignItems: 'center', gap: '6px'
+                  }}
+                >
+                  {isLocked && <span style={{ fontSize: '10px' }}>🔒</span>}
+                  {style}
+                </button>
+              )
+            })}
+          </div>
+        </>
+      )}
+    </div>
+  ) : (
+    allModes.map(style => {
+      const isLocked = lockedModes.includes(style) && !isPro
+      const isActive = activeChat.responseStyle === style
+      return (
+        <button
+          key={style}
+          onClick={() => isLocked ? navigate('/pricing') : handleStyleChange(style)}
+          style={{
+            padding: '4px 10px', borderRadius: '999px', fontSize: '11px',
+            fontWeight: '500', textTransform: 'capitalize', cursor: 'pointer',
+            border: isLocked ? '1px solid rgba(255,255,255,0.08)' : 'none',
+            backgroundColor: isActive ? '#9333ea' : 'rgba(255,255,255,0.05)',
+            color: isActive ? 'white' : isLocked ? '#4b5563' : '#9ca3af',
+            display: 'flex', alignItems: 'center', gap: '4px'
+          }}
+        >
+          {isLocked && <span style={{ fontSize: '9px' }}>🔒</span>}
+          {style}
+        </button>
+      )
+    })
+  )
+)}
         </div>
       </div>
 
