@@ -14,6 +14,7 @@ const Sidebar = () => {
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth < MOBILE_BREAKPOINT)
   const [isOpen, setIsOpen] = useState(false)
   const [chatToDelete, setChatToDelete] = useState(null)
+  const isPro = ['plus', 'pro'].includes(user?.subscriptionStatus)
  
   useEffect(() => {
     fetchChats()
@@ -142,6 +143,12 @@ const Sidebar = () => {
             🎭 Practice Mode
           </button>
         </div>
+
+        {!isPro && (
+          <div style={{ padding: '0 16px 8px', fontSize: '11px', color: '#6b7280' }}>
+            {regularChats.length}/2 conversations used
+          </div>
+        )}
  
         {/* Chat History */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '0 12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
