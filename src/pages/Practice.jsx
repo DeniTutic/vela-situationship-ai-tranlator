@@ -14,7 +14,7 @@ const MODES = [
 const Practice = () => {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const { createChat, practiceLimit, setPracticeLimit } = useChat()
+  const { createChat } = useChat()
   const [target, setTarget] = useState('')
   const [mode, setMode] = useState('realistic')
   const [voiceGender, setVoiceGender] = useState('female')
