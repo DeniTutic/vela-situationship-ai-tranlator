@@ -1,7 +1,18 @@
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 import useAuth from '../hooks/useAuth'
 import api from '../utils/api'
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } }
+}
+
+const staggerContainer = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.08 } }
+}
 
 const PLANS = [
   {
@@ -129,7 +140,7 @@ const Pricing = () => {
       )}
 
       {/* Header */}
-      <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+      <motion.div initial="hidden" animate="show" variants={fadeUp} style={{ textAlign: 'center', marginBottom: '48px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '16px' }}>
           <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'linear-gradient(135deg, #a855f7, #ec4899)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px' }}>V</div>
           <span style={{ fontWeight: '700', fontSize: '18px', fontFamily: "'Bricolage Grotesque', sans-serif" }}>Vela</span>
@@ -140,16 +151,21 @@ const Pricing = () => {
         <p style={{ color: '#6b7280', fontSize: '16px', maxWidth: '480px', margin: '0 auto' }}>
           Start free. Upgrade when you're ready for deeper insights and unlimited conversations.
         </p>
-      </div>
+      </motion.div>
 
       {/* Plans */}
-      <div style={{ display: 'flex', gap: '20px', maxWidth: '1000px', margin: '0 auto', alignItems: 'stretch', flexWrap: 'wrap', justifyContent: 'center' }}>
+      <motion.div
+        initial="hidden" animate="show" variants={staggerContainer}
+        style={{ display: 'flex', gap: '20px', maxWidth: '1000px', margin: '0 auto', alignItems: 'stretch', flexWrap: 'wrap', justifyContent: 'center' }}
+      >
         {PLANS.map(plan => {
           const isCurrentPlan = user?.subscriptionStatus === plan.key
 
           return (
-            <div
+            <motion.div
               key={plan.key}
+              variants={fadeUp}
+              whileHover={{ y: -4 }}
               style={{
                 flex: '1', minWidth: '280px', maxWidth: '320px',
                 backgroundColor: plan.key === 'plus' ? 'rgba(147,51,234,0.08)' : 'var(--bg-sidebar)',
@@ -172,9 +188,11 @@ const Pricing = () => {
                 </div>
               </div>
 
-              <button
+              <motion.button
                 onClick={() => isCurrentPlan ? null : handleUpgrade(plan.key)}
                 disabled={isCurrentPlan || plan.key === 'free'}
+                whileHover={isCurrentPlan || plan.key === 'free' ? {} : { scale: 1.03 }}
+                whileTap={isCurrentPlan || plan.key === 'free' ? {} : { scale: 0.97 }}
                 style={{
                   padding: '12px', borderRadius: '12px', fontWeight: '600', fontSize: '14px',
                   cursor: isCurrentPlan || plan.key === 'free' ? 'default' : 'pointer', border: 'none',
@@ -183,7 +201,7 @@ const Pricing = () => {
                 }}
               >
                 {isCurrentPlan ? '✓ Current plan' : plan.key === 'free' ? 'Free forever' : plan.cta}
-              </button>
+              </motion.button>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {plan.features.map((f, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
@@ -198,10 +216,10 @@ const Pricing = () => {
                   </div>
                 ))}
               </div>
-            </div>
+            </motion.div>
           )
         })}
-      </div>
+      </motion.div>
 
       <p style={{ textAlign: 'center', color: '#374151', fontSize: '13px', marginTop: '40px' }}>
         Cancel anytime. No hidden fees. Questions? Contact us at hello@vela.app
