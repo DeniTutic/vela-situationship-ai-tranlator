@@ -7,7 +7,7 @@ import toast from 'react-hot-toast'
 const VerifyEmail = () => {
   const navigate = useNavigate()
   const location = useLocation()
-  const { login: setUser } = useAuth()
+  const { refreshUser } = useAuth()
   const email = location.state?.email || ''
   const [code, setCode] = useState(['', '', '', '', '', ''])
   const [loading, setLoading] = useState(false)
@@ -44,9 +44,9 @@ const VerifyEmail = () => {
   const handleVerify = async (fullCode) => {
     setLoading(true)
     try {
-      const res = await api.post('/auth/verify-email', { email, code: fullCode || code.join('') })
-      setUser && navigate('/onboarding')
-      window.location.href = '/onboarding'
+      await api.post('/auth/verify-email', { email, code: fullCode || code.join('') })
+      await refreshUser()
+      navigate('/onboarding')
     } catch (err) {
       toast.error(err.response?.data?.message || 'Invalid code')
       setCode(['', '', '', '', '', ''])
