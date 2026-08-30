@@ -13,6 +13,7 @@ const Sidebar = () => {
   const { chats, fetchChats, createChat, deleteChat } = useChat()
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth < MOBILE_BREAKPOINT)
   const [isOpen, setIsOpen] = useState(false)
+  const [chatToDelete, setChatToDelete] = useState(null)
  
   useEffect(() => {
     fetchChats()
@@ -44,10 +45,16 @@ const Sidebar = () => {
     navigate(`/chat/${chat._id}`)
   }
  
-  const handleDelete = async (e, chatId) => {
+  const handleDelete = (e, chat) => {
     e.stopPropagation()
-    await deleteChat(chatId)
-    if (id === chatId) navigate('/chat')
+    setChatToDelete(chat)
+  }
+  
+  const confirmDelete = async () => {
+    if (!chatToDelete) return
+    await deleteChat(chatToDelete._id)
+    if (id === chatToDelete._id) navigate('/chat')
+    setChatToDelete(null)
   }
  
   const handleLogout = async () => {
@@ -180,6 +187,31 @@ const Sidebar = () => {
           </button>
         </div>
       </div>
+          {chatToDelete && (
+      <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
+        <div style={{ backgroundColor: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px', padding: '28px', maxWidth: '360px', width: '90%', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px' }}>
+          <div style={{ fontSize: '36px' }}>🗑️</div>
+          <h3 style={{ fontSize: '17px', fontWeight: '700' }}>Delete this chat?</h3>
+          <p style={{ color: '#6b7280', fontSize: '13px', lineHeight: 1.5 }}>
+            "{chatToDelete.title}" will be permanently deleted. This can't be undone.
+          </p>
+          <div style={{ display: 'flex', gap: '10px', width: '100%' }}>
+            <button
+              onClick={() => setChatToDelete(null)}
+              style={{ flex: 1, padding: '10px', backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', color: '#9ca3af', fontSize: '13px', cursor: 'pointer' }}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={confirmDelete}
+              style={{ flex: 1, padding: '10px', backgroundColor: '#dc2626', border: 'none', borderRadius: '10px', color: 'white', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
     </>
   )
 }
@@ -196,7 +228,7 @@ const ChatItem = ({ chat, activeId, onNavigate, onDelete }) => (
       <p style={{ fontSize: '11px', color: '#6b7280', marginTop: '2px' }}>{new Date(chat.updatedAt).toLocaleDateString()}</p>
     </div>
     <button
-      onClick={(e) => onDelete(e, chat._id)}
+      onClick={(e) => onDelete(e, chat)}
       style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', padding: '4px', opacity: 0 }}
       onMouseEnter={e => { e.currentTarget.style.opacity = 1; e.currentTarget.style.color = '#f87171' }}
       onMouseLeave={e => { e.currentTarget.style.opacity = 0; e.currentTarget.style.color = '#6b7280' }}
