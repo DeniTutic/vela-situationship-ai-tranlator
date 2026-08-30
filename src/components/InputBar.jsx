@@ -1,14 +1,30 @@
 import { useState, forwardRef, useRef, useEffect, useImperativeHandle } from 'react'
 import { Send, ImagePlus, X, Mic, MicOff, AudioLines, Lock } from 'lucide-react'
- 
+
+const HINT_SEEN_KEY = 'vela_input_hint_seen'
+
 const InputBar = forwardRef(({ onSend, onImageUpload, disabled, onOpenVoiceMode, voiceUnlocked = true }, ref) => {
   const [text, setText] = useState('')
   const [imagePreview, setImagePreview] = useState(null)
   const [imageFile, setImageFile] = useState(null)
   const [listening, setListening] = useState(false)
+  const [showControlsHint, setShowControlsHint] = useState(false)
   const fileRef = useRef(null)
   const recognitionRef = useRef(null)
   const textareaRef = useRef(null)
+
+  useEffect(() => {
+    try {
+      if (!localStorage.getItem(HINT_SEEN_KEY)) setShowControlsHint(true)
+    } catch {
+      setShowControlsHint(true)
+    }
+  }, [])
+
+  const dismissControlsHint = () => {
+    setShowControlsHint(false)
+    try { localStorage.setItem(HINT_SEEN_KEY, '1') } catch { /* ignore */ }
+  }
 
   useImperativeHandle(ref, () => ({
     focus: () => textareaRef.current?.focus(),
@@ -60,6 +76,7 @@ const InputBar = forwardRef(({ onSend, onImageUpload, disabled, onOpenVoiceMode,
  
   const handleSend = () => {
     if ((!text.trim() && !imageFile) || disabled) return
+    if (showControlsHint) dismissControlsHint()
     if (listening) {
       recognitionRef.current.stop()
       setListening(false)
@@ -102,7 +119,25 @@ const InputBar = forwardRef(({ onSend, onImageUpload, disabled, onOpenVoiceMode,
  
   return (
     <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '12px 24px' }}>
-    <div style={{ maxWidth: '760px', margin: '0 auto' }}> 
+    <div style={{ maxWidth: '760px', margin: '0 auto' }}>
+      {/* One-time explainer for the three input controls */}
+      {showControlsHint && (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', backgroundColor: 'rgba(168,85,247,0.08)', border: '1px solid rgba(168,85,247,0.2)', borderRadius: '10px', padding: '8px 12px', marginBottom: '8px' }}>
+          <p style={{ fontSize: '11px', color: '#c4b5fd', lineHeight: 1.5 }}>
+            <ImagePlus size={11} style={{ verticalAlign: '-1px', marginRight: '3px' }} />Upload a screenshot ·{' '}
+            <Mic size={11} style={{ verticalAlign: '-1px', marginRight: '3px' }} />Dictate speech ·{' '}
+            <AudioLines size={11} style={{ verticalAlign: '-1px', marginRight: '3px' }} />Talk live with Vela
+          </p>
+          <button
+            onClick={dismissControlsHint}
+            aria-label="Dismiss"
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9ca3af', padding: '2px', flexShrink: 0 }}
+          >
+            <X size={13} />
+          </button>
+        </div>
+      )}
+
       {/* Image preview */}
       {imagePreview && (
         <div style={{ marginBottom: '8px', position: 'relative', display: 'inline-block' }}>
@@ -215,7 +250,18 @@ const InputBar = forwardRef(({ onSend, onImageUpload, disabled, onOpenVoiceMode,
         </div>
       </div>
       <p style={{ fontSize: '11px', color: '#374151', textAlign: 'center', marginTop: '8px' }}>
-        Enter to send · Shift+Enter for new line · 🎙️ dictates, 🔊 talks live
+        Enter to send · Shift+Enter for new line
+      </p>
+      <p style={{ fontSize: '10px', color: '#374151', textAlign: 'center', marginTop: '4px' }}>
+        Vela supports clarity, not crisis care ·{' '}
+        <a
+          href="https://findahelpline.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: '#4b5563', textDecoration: 'underline' }}
+        >
+          Find a helpline
+        </a>
       </p>
     </div>
     </div>
