@@ -29,8 +29,14 @@ router.patch('/profile', protect, async (req, res) => {
 })
 router.patch('/onboarding', protect, async (req, res) => {
   try {
-    await User.findByIdAndUpdate(req.user._id, { onboardingCompleted: true })
-    res.json({ success: true })
+    const { category, defaultResponseStyle } = req.body
+    const update = { onboardingCompleted: true }
+
+    if (category) update.category = category
+    if (defaultResponseStyle) update.defaultResponseStyle = defaultResponseStyle
+
+    const user = await User.findByIdAndUpdate(req.user._id, update, { new: true }).select('-passwordHash')
+    res.json(user)
   } catch (err) {
     res.status(500).json({ message: 'Failed to update onboarding' })
   }
