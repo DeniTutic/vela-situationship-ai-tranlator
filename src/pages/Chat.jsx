@@ -462,6 +462,12 @@ return (
         </div>
       )}
 
+      {id && !showVoice && !isPro && activeChat && !activeChat.isPractice && (
+        <p style={{ textAlign: 'center', fontSize: '11px', color: '#6b7280', margin: '0 0 6px' }}>
+          {messages.filter(m => m.role === 'user').length}/4 messages in this chat
+        </p>
+      )}
+
       {/* Input */}
       {id && !showVoice && (
         <InputBar
