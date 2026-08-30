@@ -78,7 +78,14 @@ const Signup = () => {
             {loading ? 'Creating account...' : 'Create account'}
           </motion.button>
         </motion.form>
- 
+
+        <motion.p variants={fadeUp} style={{ textAlign: 'center', marginTop: '16px', fontSize: '12px', color: '#4b5563', lineHeight: 1.5 }}>
+          By continuing, you agree to Vela's{' '}
+          <Link to="/terms" style={{ color: '#6b7280', textDecoration: 'underline' }}>Terms of Service</Link>{' '}
+          and{' '}
+          <Link to="/privacy" style={{ color: '#6b7280', textDecoration: 'underline' }}>Privacy Policy</Link>.
+        </motion.p>
+
         <motion.p variants={fadeUp} style={{ textAlign: 'center', marginTop: '20px', fontSize: '13px', color: '#6b7280' }}>
           Already have an account?{' '}
           <Link to="/login" style={{ color: '#a855f7', textDecoration: 'none', fontWeight: '600' }}>Log in</Link>

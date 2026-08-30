@@ -12,6 +12,8 @@ import Onboarding from './pages/Onboarding'
 import Pricing from './pages/Pricing'
 import VerifyEmail from './pages/VerifyEmail'
 import ForgotPassword from './pages/ForgotPassword'
+import PrivacyPolicy from './pages/PrivacyPolicy'
+import Terms from './pages/Terms'
  
 const pageVariants = {
   initial: { opacity: 0, y: 8 },
@@ -43,6 +45,8 @@ function App() {
           <Route path="/signup" element={<PageTransition><Signup /></PageTransition>} />
           <Route path="/verify-email" element={<PageTransition><VerifyEmail /></PageTransition>} />
           <Route path="/forgot-password" element={<PageTransition><ForgotPassword /></PageTransition>} />
+          <Route path="/privacy" element={<PageTransition><PrivacyPolicy /></PageTransition>} />
+          <Route path="/terms" element={<PageTransition><Terms /></PageTransition>} />
           <Route path="/onboarding" element={<ProtectedRoute><PageTransition><Onboarding /></PageTransition></ProtectedRoute>} />
           <Route path="/chat" element={<ProtectedRoute><PageTransition><Chat /></PageTransition></ProtectedRoute>} />
           <Route path="/chat/:id" element={<ProtectedRoute><PageTransition><Chat /></PageTransition></ProtectedRoute>} />

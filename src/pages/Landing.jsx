@@ -427,7 +427,11 @@ const Landing = () => {
         </motion.div>
       </div>
  
-      <div style={{ position: 'relative', zIndex: 5, textAlign: 'center', padding: '24px', color: '#4b5563', fontSize: '13px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      <div style={{ position: 'relative', zIndex: 5, textAlign: 'center', padding: '24px', color: '#4b5563', fontSize: '13px', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+        <div style={{ display: 'flex', gap: '20px' }}>
+          <button onClick={() => navigate('/privacy')} style={{ background: 'none', border: 'none', padding: 0, color: '#6b7280', cursor: 'pointer', fontSize: '13px' }}>Privacy Policy</button>
+          <button onClick={() => navigate('/terms')} style={{ background: 'none', border: 'none', padding: 0, color: '#6b7280', cursor: 'pointer', fontSize: '13px' }}>Terms of Service</button>
+        </div>
         © 2026 Vela. All rights reserved.
       </div>
     </div>
