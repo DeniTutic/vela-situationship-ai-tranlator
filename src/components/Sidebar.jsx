@@ -158,17 +158,17 @@ const Sidebar = () => {
             <>
               <p style={{ fontSize: '11px', color: '#4b5563', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '8px 4px 4px' }}>Chats</p>
               {regularChats.map(chat => (
-                <ChatItem key={chat._id} chat={chat} activeId={id} onNavigate={navigate} onDelete={handleDelete} />
+                <ChatItem key={chat._id} chat={chat} activeId={id} onNavigate={navigate} onDelete={handleDelete} isMobile={isMobile} />
               ))}
             </>
           )}
- 
+
           {/* Practice chats */}
           {practiceChats.length > 0 && (
             <>
               <p style={{ fontSize: '11px', color: '#4b5563', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '12px 4px 4px' }}>🎭 Practice</p>
               {practiceChats.map(chat => (
-                <ChatItem key={chat._id} chat={chat} activeId={id} onNavigate={navigate} onDelete={handleDelete} />
+                <ChatItem key={chat._id} chat={chat} activeId={id} onNavigate={navigate} onDelete={handleDelete} isMobile={isMobile} />
               ))}
             </>
           )}
@@ -223,7 +223,7 @@ const Sidebar = () => {
   )
 }
  
-const ChatItem = ({ chat, activeId, onNavigate, onDelete }) => (
+const ChatItem = ({ chat, activeId, onNavigate, onDelete, isMobile }) => (
   <div
     onClick={() => onNavigate(`/chat/${chat._id}`)}
     style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', borderRadius: '12px', cursor: 'pointer', backgroundColor: activeId === chat._id ? 'rgba(255,255,255,0.1)' : 'transparent' }}
@@ -236,9 +236,10 @@ const ChatItem = ({ chat, activeId, onNavigate, onDelete }) => (
     </div>
     <button
       onClick={(e) => onDelete(e, chat)}
-      style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', padding: '4px', opacity: 0 }}
+      aria-label="Delete chat"
+      style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', padding: '4px', opacity: isMobile ? 1 : 0 }}
       onMouseEnter={e => { e.currentTarget.style.opacity = 1; e.currentTarget.style.color = '#f87171' }}
-      onMouseLeave={e => { e.currentTarget.style.opacity = 0; e.currentTarget.style.color = '#6b7280' }}
+      onMouseLeave={e => { e.currentTarget.style.opacity = isMobile ? 1 : 0; e.currentTarget.style.color = '#6b7280' }}
     >
       <Trash2 size={13} />
     </button>
