@@ -16,6 +16,7 @@ const userSchema = new mongoose.Schema({
   messagesUsedToday: { type: Number, default: 0 },
   messagesResetAt: { type: Date, default: Date.now },
   practiceSessionsUsed: { type: Number, default: 0 },
+  category: { type: String, enum: ['dating', 'friendship', 'family', 'work'], default: null },
   defaultResponseStyle: {
     type: String,
     enum: ['gentle', 'analytical', 'brutal', 'hype', 'therapist'],
