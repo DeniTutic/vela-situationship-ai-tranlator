@@ -275,7 +275,7 @@ const lockedModes = ['brutal', 'hype', 'therapist']
 const allModes = [...freeModes, ...lockedModes]
 
 return (
-  <div style={{ display: 'flex', height: '100vh', backgroundColor: '#0f0f0f', color: 'white', overflow: 'hidden' }}>
+  <div style={{ display: 'flex', height: '100vh', backgroundColor: 'var(--bg-elevated)', color: 'white', overflow: 'hidden' }}>
     <Sidebar />
 
     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
@@ -315,7 +315,7 @@ return (
           <div onClick={() => setToneMenuOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 20 }} />
           <div style={{
             position: 'absolute', top: '32px', right: 0, zIndex: 21,
-            backgroundColor: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)',
+            backgroundColor: 'var(--bg-card)', border: '1px solid rgba(255,255,255,0.1)',
             borderRadius: '12px', padding: '6px', minWidth: '140px',
             display: 'flex', flexDirection: 'column', gap: '2px',
             boxShadow: '0 8px 24px rgba(0,0,0,0.4)'
@@ -495,7 +495,7 @@ return (
     {/* Debrief upgrade popup */}
     {showDebriefUpgrade && (
       <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-        <div style={{ backgroundColor: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px', padding: '32px', maxWidth: '400px', width: '90%', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+        <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px', padding: '32px', maxWidth: '400px', width: '90%', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
           <div style={{ fontSize: '48px' }}>📊</div>
           <h3 style={{ fontSize: '20px', fontWeight: '700' }}>Debrief is a Vela+ feature</h3>
           <p style={{ color: '#6b7280', fontSize: '14px', lineHeight: 1.6 }}>
@@ -522,7 +522,7 @@ return (
     {/* Conversation cap upgrade popup */}
     {conversationCapReached && (
       <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-        <div style={{ backgroundColor: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px', padding: '32px', maxWidth: '400px', width: '90%', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+        <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px', padding: '32px', maxWidth: '400px', width: '90%', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
           <div style={{ fontSize: '48px' }}>💬</div>
           <h3 style={{ fontSize: '20px', fontWeight: '700' }}>You've reached your conversation limit</h3>
           <p style={{ color: '#6b7280', fontSize: '14px', lineHeight: 1.6 }}>

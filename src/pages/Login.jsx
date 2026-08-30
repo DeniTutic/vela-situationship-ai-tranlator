@@ -52,7 +52,7 @@ const Login = () => {
   }
  
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#0f0f0f', color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-elevated)', color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
       <motion.div variants={staggerContainer} initial="hidden" animate="show" style={{ width: '100%', maxWidth: '380px' }}>
         <motion.div variants={fadeUp} style={{ textAlign: 'center', marginBottom: '32px' }}>
           <motion.div

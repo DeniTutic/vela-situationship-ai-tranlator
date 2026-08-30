@@ -31,7 +31,7 @@ const Profile = () => {
   }
 
   return (
-    <div style={{ display: 'flex', height: '100vh', backgroundColor: '#0f0f0f', color: 'white', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', height: '100vh', backgroundColor: 'var(--bg-elevated)', color: 'white', overflow: 'hidden' }}>
       <Sidebar />
 
       {/* Content */}

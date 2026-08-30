@@ -191,7 +191,7 @@ const InputBar = forwardRef(({ onSend, onImageUpload, disabled, onOpenVoiceMode,
             >
               <AudioLines size={14} color="#c084fc" />
               {!voiceUnlocked && (
-                <span style={{ position: 'absolute', top: '-4px', right: '-4px', width: '13px', height: '13px', borderRadius: '50%', backgroundColor: '#1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ position: 'absolute', top: '-4px', right: '-4px', width: '13px', height: '13px', borderRadius: '50%', backgroundColor: 'var(--bg-card)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Lock size={8} color="#6b7280" />
                 </span>
               )}

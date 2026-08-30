@@ -66,7 +66,7 @@ const Onboarding = () => {
   const slide = !isPersonalizeStep ? SLIDES[step] : null
 
   return (
-    <div style={{ height: '100vh', backgroundColor: '#0f0f0f', color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 24px', position: 'relative' }}>
+    <div style={{ height: '100vh', backgroundColor: 'var(--bg-elevated)', color: 'white', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 24px', position: 'relative' }}>
       {/* Skip */}
       <button
         onClick={handleFinish}

@@ -47,7 +47,7 @@ const Practice = () => {
  
   if (error === 'practice_limit') {
     return (
-      <div style={{ display: 'flex', height: '100vh', backgroundColor: '#0f0f0f', color: 'white', overflow: 'hidden' }}>
+      <div style={{ display: 'flex', height: '100vh', backgroundColor: 'var(--bg-elevated)', color: 'white', overflow: 'hidden' }}>
         <Sidebar />
         <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px', overflowY: 'auto' }}>
           <div style={{ maxWidth: '420px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '20px' }}>
@@ -77,7 +77,7 @@ const Practice = () => {
   }
 
   return (
-    <div className="practice-layout" style={{ display: 'flex', height: '100vh', backgroundColor: '#0f0f0f', color: 'white', overflow: 'hidden' }}>
+    <div className="practice-layout" style={{ display: 'flex', height: '100vh', backgroundColor: 'var(--bg-elevated)', color: 'white', overflow: 'hidden' }}>
       <style>{`
         @media (max-width: 768px) {
           .practice-main { padding: 24px 20px !important; }

@@ -97,7 +97,7 @@ const Pricing = () => {
   }, [])
 
   if (!refreshed) return (
-    <div style={{ height: '100vh', backgroundColor: '#0f0f0f', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <div style={{ height: '100vh', backgroundColor: 'var(--bg-elevated)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <div style={{ width: '32px', height: '32px', border: '2px solid #a855f7', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
     </div>
   )
@@ -112,7 +112,7 @@ const Pricing = () => {
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#0f0f0f', color: 'white', padding: '40px 24px' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-elevated)', color: 'white', padding: '40px 24px' }}>
       {/* Back */}
       <button
         onClick={() => navigate(-1)}
@@ -152,7 +152,7 @@ const Pricing = () => {
               key={plan.key}
               style={{
                 flex: '1', minWidth: '280px', maxWidth: '320px',
-                backgroundColor: plan.key === 'plus' ? 'rgba(147,51,234,0.08)' : '#111111',
+                backgroundColor: plan.key === 'plus' ? 'rgba(147,51,234,0.08)' : 'var(--bg-sidebar)',
                 border: plan.key === 'plus' ? '1px solid rgba(147,51,234,0.4)' : '1px solid rgba(255,255,255,0.06)',
                 borderRadius: '20px', padding: '28px', display: 'flex', flexDirection: 'column', gap: '20px',
                 position: 'relative'

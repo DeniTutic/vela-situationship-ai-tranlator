@@ -122,7 +122,7 @@ const Landing = () => {
   }, [])
  
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#08080b', color: 'white', fontFamily: "'Inter', sans-serif", overflowX: 'hidden', position: 'relative' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--bg-base)', color: 'white', fontFamily: "'Inter', sans-serif", overflowX: 'hidden', position: 'relative' }}>
       <style>{`
         @keyframes scanline { 0% { top: -10%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 110%; opacity: 0; } }
         @keyframes pulseDot { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
@@ -327,8 +327,8 @@ const Landing = () => {
           People trust Vela with the hard conversations
         </motion.h2>
         <div style={{ position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '100px', background: 'linear-gradient(90deg, #08080b, transparent)', zIndex: 2, pointerEvents: 'none' }} />
-          <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '100px', background: 'linear-gradient(270deg, #08080b, transparent)', zIndex: 2, pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '100px', background: 'linear-gradient(90deg, var(--bg-base), transparent)', zIndex: 2, pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', right: 0, top: 0, bottom: 0, width: '100px', background: 'linear-gradient(270deg, var(--bg-base), transparent)', zIndex: 2, pointerEvents: 'none' }} />
           <div className="marquee-track" style={{ display: 'flex', gap: '16px', width: 'max-content', padding: '0 24px' }}>
             {[0, 1].flatMap((dup) =>
               testimonials.map((t, i) => (

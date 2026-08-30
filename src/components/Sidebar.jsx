@@ -98,7 +98,7 @@ const Sidebar = () => {
  
       <div style={{
         width: '256px', minWidth: '256px', height: '100vh',
-        backgroundColor: '#111111', borderRight: '1px solid rgba(255,255,255,0.05)',
+        backgroundColor: 'var(--bg-sidebar)', borderRight: '1px solid rgba(255,255,255,0.05)',
         display: 'flex', flexDirection: 'column', flexShrink: 0,
         ...(isMobile ? {
           position: 'fixed', top: 0, left: 0, zIndex: 35,
@@ -196,7 +196,7 @@ const Sidebar = () => {
       </div>
           {chatToDelete && (
       <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-        <div style={{ backgroundColor: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px', padding: '28px', maxWidth: '360px', width: '90%', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px' }}>
+        <div style={{ backgroundColor: 'var(--bg-card)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '20px', padding: '28px', maxWidth: '360px', width: '90%', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '14px' }}>
           <div style={{ fontSize: '36px' }}>🗑️</div>
           <h3 style={{ fontSize: '17px', fontWeight: '700' }}>Delete this chat?</h3>
           <p style={{ color: '#6b7280', fontSize: '13px', lineHeight: 1.5 }}>
