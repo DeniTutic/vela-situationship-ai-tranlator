@@ -34,8 +34,6 @@ const PLANS = [
       'Voice & image input',
       'Unlimited practice',
     ],
-    cta: 'Downgrade to Free',
-    disabled: false
   },
   {
     key: 'plus',
@@ -60,7 +58,6 @@ const PLANS = [
       'Priority speed',
     ],
     cta: 'Upgrade to Vela+',
-    disabled: false
   },
   {
     key: 'pro',
@@ -82,7 +79,6 @@ const PLANS = [
     ],
     locked: [],
     cta: 'Upgrade to VelaPro',
-    disabled: false
   }
 ]
 
