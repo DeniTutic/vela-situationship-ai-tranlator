@@ -174,24 +174,31 @@ const sendMessage = async (req, res) => {
  
     if (history.length === 1 && !chat.isPractice) {
       try {
-        const titlePrompt = `Based on this conversation, write a short 4-6 word title using specific, concrete details — a name, topic, or situation actually mentioned. Do NOT use vague therapy phrases like "navigating love's uncertainty" or "understanding your feelings". If the user's message has no real content (just a greeting like "hi" or "hey"), respond with exactly: New Chat
+        const wordCount = content.trim().split(/\s+/).length;
+    
+        if (wordCount <= 4) {
+          const shortTitle = content.trim().charAt(0).toUpperCase() + content.trim().slice(1, 40);
+          await Chat.findByIdAndUpdate(chat._id, { title: shortTitle });
+        } else {
+          const titlePrompt = `Based on this conversation, write a short 4-6 word title using specific, concrete details — a name, topic, or situation actually mentioned. Do NOT use vague therapy phrases like "navigating love's uncertainty" or "understanding your feelings".
     
     User: "${content}"
     Assistant: "${fullResponse}"
     
     Return only the title, nothing else.`;
     
-        const titleCompletion = await groq.chat.completions.create({
-          model: 'openai/gpt-oss-120b',
-          messages: [{ role: 'user', content: titlePrompt }],
-          max_tokens: 600,
-          reasoning_effort: 'low'
-        });
-        const generatedTitle = titleCompletion.choices[0]?.message?.content?.trim();
-        if (generatedTitle) {
-          await Chat.findByIdAndUpdate(chat._id, { title: generatedTitle });
-        } else {
-          console.log('Title generation returned empty. Full response:', JSON.stringify(titleCompletion.choices[0]));
+          const titleCompletion = await groq.chat.completions.create({
+            model: 'openai/gpt-oss-120b',
+            messages: [{ role: 'user', content: titlePrompt }],
+            max_tokens: 600,
+            reasoning_effort: 'low'
+          });
+          const generatedTitle = titleCompletion.choices[0]?.message?.content?.trim();
+          if (generatedTitle) {
+            await Chat.findByIdAndUpdate(chat._id, { title: generatedTitle });
+          } else {
+            console.log('Title generation returned empty. Full response:', JSON.stringify(titleCompletion.choices[0]));
+          }
         }
       } catch (titleErr) {
         console.error('Title generation failed (non-fatal):', titleErr.message);
