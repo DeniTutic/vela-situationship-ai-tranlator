@@ -114,9 +114,9 @@ export const ChatProvider = ({ children }) => {
                 setStreamingMessage(accumulated)
               }
               if (data.done) {
-                setStreamingMessage('')
                 const chatRes = await api.get(`/chat/${chatId}`)
                 setMessages(chatRes.data.messages)
+                setStreamingMessage('')
                 await fetchChats()
                 const lastMsg = chatRes.data.messages[chatRes.data.messages.length - 1]
                 finalText = lastMsg?.role === 'assistant' ? lastMsg.content : accumulated
