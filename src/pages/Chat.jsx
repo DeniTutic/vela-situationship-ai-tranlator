@@ -9,6 +9,7 @@ import useChat from '../hooks/useChat'
 import api from '../utils/api'
 import ReactMarkdown from 'react-markdown'
 import { ChevronDown } from 'lucide-react'
+import toast from 'react-hot-toast'
 
 const WELCOME_MESSAGE = {
 role: 'assistant',
@@ -24,23 +25,23 @@ worst: { rate: 1.3, pitch: 0.78 },
 default: { rate: 1, pitch: 1.05 }
 }
 
-const LimitBanner = ({ msUntilReset, onUpgrade }) => {
-const [timeLeft, setTimeLeft] = useState(msUntilReset)
+const LimitBanner = ({ msUntilReset, onUpgrade, onExpire }) => {
+  const [timeLeft, setTimeLeft] = useState(msUntilReset)
 
-useEffect(() => {
-  if (!timeLeft) return
-  const interval = setInterval(() => {
-    setTimeLeft(prev => {
-      if (prev <= 1000) {
-        clearInterval(interval)
-        window.location.reload()
-        return 0
-      }
-      return prev - 1000
-    })
-  }, 1000)
-  return () => clearInterval(interval)
-}, [])
+  useEffect(() => {
+    if (!timeLeft) return
+    const interval = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1000) {
+          clearInterval(interval)
+          onExpire?.()
+          return 0
+        }
+        return prev - 1000
+      })
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [])
 
 const hours = Math.floor(timeLeft / (1000 * 60 * 60))
 const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60))
@@ -444,7 +445,14 @@ return (
 
       {/* Limit banners above input */}
       {id && limitReached && (
-        <LimitBanner msUntilReset={msUntilReset} onUpgrade={() => navigate('/pricing')} />
+        <LimitBanner
+          msUntilReset={msUntilReset}
+          onUpgrade={() => navigate('/pricing')}
+          onExpire={() => {
+            setLimitReached(false)
+            toast.success("You're good to go — send a message!")
+          }}
+        />
       )}
       {id && !limitReached && messageCapReached && (
         <MessageCapBanner onUpgrade={() => navigate('/pricing')} />
