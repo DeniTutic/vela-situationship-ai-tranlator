@@ -41,7 +41,12 @@ const signup = async (req, res) => {
       verificationCodeExpiry: expiry
     });
 
-    await sendVerificationEmail(email, name, code)
+    try {
+      await sendVerificationEmail(email, name, code)
+    } catch (emailErr) {
+      await User.deleteOne({ _id: user._id });
+      throw emailErr;
+    }
 
     res.status(201).json({ message: 'Verification code sent', email, userId: user._id })
   } catch (err) {
