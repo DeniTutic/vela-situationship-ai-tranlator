@@ -4,10 +4,11 @@ import useAuth from '../hooks/useAuth'
 import api from '../utils/api'
 import toast from 'react-hot-toast'
 import useChat from '../hooks/useChat'
+import Sidebar from '../components/Sidebar'
 
 const Profile = () => {
   const navigate = useNavigate()
-  const { user, logout, refreshUser } = useAuth()
+  const { user, refreshUser } = useAuth()
   const [name, setName] = useState(user?.name || '')
   const [loading, setLoading] = useState(false)
 
@@ -15,11 +16,6 @@ const Profile = () => {
 
   const { chats } = useChat()
   const regularChatCount = chats.filter(c => !c.isPractice).length
-
-  const handleLogout = async () => {
-    await logout()
-    navigate('/')
-  }
 
   const handleSave = async () => {
     setLoading(true)
@@ -35,19 +31,11 @@ const Profile = () => {
   }
 
   return (
-    <div style={{ display: 'flex', height: '100vh', backgroundColor: '#0f0f0f', color: 'white' }}>
-      {/* Sidebar */}
-      <div style={{ width: '256px', minWidth: '256px', height: '100vh', backgroundColor: '#111111', borderRight: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', padding: '20px 16px', gap: '12px' }}>
-        <button
-          onClick={() => navigate('/chat')}
-          style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'none', border: 'none', color: '#9ca3af', cursor: 'pointer', fontSize: '14px', padding: '8px', borderRadius: '8px' }}
-        >
-          ← Back to chats
-        </button>
-      </div>
+    <div style={{ display: 'flex', height: '100vh', backgroundColor: '#0f0f0f', color: 'white', overflow: 'hidden' }}>
+      <Sidebar />
 
       {/* Content */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px' }}>
+      <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px', overflowY: 'auto' }}>
         <div style={{ width: '100%', maxWidth: '420px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
           {/* Avatar */}
@@ -97,14 +85,6 @@ const Profile = () => {
               {loading ? 'Saving...' : 'Save changes'}
             </button>
           </div>
-
-          {/* Logout */}
-          <button
-            onClick={handleLogout}
-            style={{ padding: '10px', backgroundColor: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: '10px', color: '#f87171', fontSize: '14px', fontWeight: '500', cursor: 'pointer' }}
-          >
-            Log out
-          </button>
         </div>
       </div>
     </div>

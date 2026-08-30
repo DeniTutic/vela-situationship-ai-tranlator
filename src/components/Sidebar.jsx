@@ -109,7 +109,7 @@ const Sidebar = () => {
       }}>
         {/* Logo */}
         <div
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/chat')}
           style={{ padding: '20px 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer' }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
