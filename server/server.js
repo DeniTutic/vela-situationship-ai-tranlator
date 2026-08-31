@@ -33,8 +33,10 @@ app.use('/api/voice', voiceRoutes)
 app.get('/api/health', (req, res) => {
   res.json({ status: 'Vela API is running' })
 })
+app.get('/', (req, res) => {
+  res.json({ status: 'Vela API is running' })
+})
 
 const PORT = process.env.PORT || 8080
-connectDB().then(() => {
-  app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
-})
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
+connectDB()
