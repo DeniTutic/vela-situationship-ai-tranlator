@@ -1,5 +1,5 @@
 import { createContext, useState } from 'react'
-import api from '../utils/api'
+import api, { API_URL } from '../utils/api'
  
 export const ChatContext = createContext()
  
@@ -57,7 +57,7 @@ export const ChatProvider = ({ children }) => {
       setMessages(prev => [...prev, userMsg])
       setStreamingMessage('')
  
-      const response = await fetch(`/api/chat/${chatId}/message`, {
+      const response = await fetch(`${API_URL}/api/chat/${chatId}/message`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

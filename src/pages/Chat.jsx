@@ -7,7 +7,7 @@ import ChatBubble from '../components/ChatBubble'
 import InputBar from '../components/InputBar'
 import VoiceMode from '../components/VoiceMode'
 import useChat from '../hooks/useChat'
-import api from '../utils/api'
+import api, { API_URL } from '../utils/api'
 import ReactMarkdown from 'react-markdown'
 import { ChevronDown } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -216,7 +216,7 @@ const handleImageUpload = async (file, caption = '') => {
     formData.append('image', file)
     if (caption) formData.append('caption', caption)
 
-    const response = await fetch(`/api/chat/${id}/upload-image`, {
+    const response = await fetch(`${API_URL}/api/chat/${id}/upload-image`, {
       method: 'POST',
       credentials: 'include',
       body: formData
